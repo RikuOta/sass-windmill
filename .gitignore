@@ -1,2 +1,6 @@
-.sass-cache/
+.DS_Store
+.idea
+node_modules
+.sass-cache
 *.css.map
+index.css
