@@ -189,8 +189,9 @@ Use with selector or take `$selector` argument.
 
 ### Breakpoints
 
-- Set `$wm-breakpoints` global variable or take `$breakpoints` argument.  
-- Key name of breakpoints replace the "SCR" string in selector.  
+- Set `$wm-breakpoints` global variable or take `$breakpoints` argument.
+- Breakpoints is a map of (breakpoint-name: minimum screen width), order from small to large.  
+- The breakpoint-name replace the "SCR" string in selector.  
 ("SCR" === `$wm-breakpoint-placeholder`).
 - If breakpoint < 1, output styles to outside @media block.
 
@@ -302,9 +303,9 @@ Compiles to:
 
 ### Generate styles (with value-variable)
 
-- `$declarations` argument accepts value-variable of `$variable$`.  
-If you use value-variable, define `$values` argument together as below.  
-- Key name of map in `$values` argument replace the "VAL" string in selector.  
+- `$declarations` argument accepts value-variable of `'$variable$'`, If use, have to take `$values` argument together.
+- `$values` argument expects a map of (value-variable: (value-name: value).
+- The value-name replace the "VAL" string in selector.  
 ("VAL" === `$wm-value-placeholder`).
 
 ```scss
@@ -602,27 +603,7 @@ Compiles to:
 
 #### Disable
 
-If true, output no styles.
-
-```scss
-$wm-breakpoints: (
-    all: 0,
-    sm: 576px,
-    md: 768px,
-    lg: 992px,
-    xl: 1200px
-);
-
-.SCR-your-selector {
-    @include windmill(
-        $disable: true
-    ) { }
-}
-```
-
-```css
-/* Output nothing */
-```
+If `$disable` argument is true, output no styles.
 
 ## License
 
