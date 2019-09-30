@@ -107,8 +107,6 @@ Compiles to:
 }
 ```
 
-<!-- [Use at CodePen immediately.](https://) -->
-
 ## Install
 
 ```
@@ -117,7 +115,7 @@ npm i sass-windmill
 
 or
 
-[Download sass-windmill from GitHub](https://) into your Sass project.  
+[Download sass-windmill](https://github.com/RikuOta/sass-windmill/archive/master.zip) into your Sass project.  
 The target is 3 files.
 
 ```text
@@ -625,8 +623,6 @@ $wm-breakpoints: (
 ```css
 /* Output nothing */
 ```
-
-<!-- [Use at CodePen immediately.](https://) -->
 
 ## License
 
