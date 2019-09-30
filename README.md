@@ -1,4 +1,4 @@
-# Sass Windmill
+# Sass Windmill [![Build Status](https://travis-ci.org/RikuOta/sass-windmill.svg?branch=master)](https://travis-ci.org/RikuOta/sass-windmill)
 
 Provides a `windmill()` [Sass](https://sass-lang.com/) mixin, help to define utility classes like `.mb-10px` flexibly and simply.
 
