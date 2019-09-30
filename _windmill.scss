@@ -1,0 +1,126 @@
+@import './windmill-utils';
+@import './windmill-lib';
+
+// ------------------------------
+// Default settings
+// ------------------------------
+
+// Please override with your own preferences
+// after importing this file to your Sass project.
+
+// A map of (breakpoint-name: minimum screen width),
+// order from small to large.
+$wm-breakpoints: (
+    all: 0px, // Output to outside @media block.
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1200px
+) !default;
+
+// Temporary selector name to be replaced by breakpoint-name.
+$wm-breakpoint-placeholder: SCR !default;
+
+// Temporary selector name to be replaced by value-name.
+$wm-value-placeholder: VAL !default;
+
+// If use breakpoint-prefix on minimum screen width, set true.
+//
+// Example:
+// Selector: .foo-SCR-bar
+// Breakpoints: (all: 0px, sm: 576px, md: 768px, ...)
+// If true: .foo-all-bar
+// If false: .foo--bar
+$wm-min-breakpoint-prefix: false !default;
+
+// When $wm-min-breakpoint-prefix is false,
+// number of strings that delete together from selector.
+//
+// Example:
+// Selector: .foo-SCR-bar
+// If 0: .foo--bar
+// If 1: .foo-bar
+// If 2: .foo-ar
+// If -2: .fo-bar
+$wm-min-breakpoint-addition: 1 !default;
+
+// Mixin name that use to warn.
+$wm-mixin-name: windmill;
+
+// ------------------------------
+// Main mixin
+// ------------------------------
+
+@mixin windmill(//
+    // A map of (property: value),
+    // value can contains value-variable of "$variable-name$".
+    // Example: (width: 1rem, height: '$size$')
+    $declarations: null,
+
+    // A map of (value-variable: (value-name: value)).
+    // Example: ('$size$': (1: 0.25rem, 2: 0.5rem, 3: 0.75rem))
+    $values: null,
+
+    // A list of (value-name, value-name, value-name, ...).
+    // You can remove specific value-name in $values.
+    $remove: null,
+
+    // If true, output no styles.
+    $disable: false,
+
+    // If take $breakpoints, have to contain $wm-breakpoint-placeholder.
+    // Example: .SCR-size
+    //
+    // If take $value, have to contain $wm-value-placeholder.
+    // Example: .size-VAL
+    $selector: #{&},
+
+    $breakpoints: $wm-breakpoints
+) {
+    $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
+
+    @if $no-exception {
+
+        // Remove specific value-name in $values.
+        @if $remove and $values {
+            @each $remove-value in $remove {
+                @if not _str-has(#{$remove-value}, '$') {
+                    $values: _map-deep-remove($values, $remove-value);
+                } @else {
+                    @warn '$remove argument of #{$wm-mixin-name}() can\'t remove value-variable.';
+                }
+            }
+        }
+
+        // If not match variables number of $declarations and $values, warn.
+        @if $declarations and $values {
+            @include wm-warn-var-number-mismatch($declarations, $values);
+        }
+
+        @if not $breakpoints {
+            @include output-styles-without-var($selector, false, false, $declarations, $values) {
+                @content;
+            }
+            @if $declarations and $values {
+                @each $value-name in wm-get-value-names($values) {
+                    @include output-styles-with-var($selector, false, false, $declarations, $values, $value-name);
+                }
+            }
+        }
+
+        @if $breakpoints {
+            @each $breakpoint-name, $breakpoint in $breakpoints {
+                @include wm-mq($breakpoint) {
+                    @include output-styles-without-var($selector, $breakpoints, $breakpoint-name, $declarations, $values) {
+                        @content;
+                    }
+                    @if $declarations and $values {
+                        @each $value-name in wm-get-value-names($values) {
+                            @include output-styles-with-var($selector, $breakpoints, $breakpoint-name, $declarations, $values, $value-name);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

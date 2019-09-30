@@ -1,0 +1,304 @@
+// ------------------------------
+// Lists
+// ------------------------------
+
+@function _list-has($list, $value) {
+    @return index($list, $value) != null;
+}
+
+@function _list-last($list) {
+    @return nth($list, length($list));
+}
+
+@function _list-unique($list) {
+    $unique-list: ();
+    @each $value in $list {
+        @if not _list-has($unique-list, $value) {
+            $unique-list: append($unique-list, $value);
+        }
+    }
+    @return $unique-list;
+}
+
+// _list-slice((foo, bar, baz), 1, 2); => (foo)
+// _list-slice((foo, bar, baz), 2); => (bar, baz)
+@function _list-slice($list, $begin, $end: length($list) + 1) {
+    $sliced-list: ();
+    @each $value in $list {
+        $index: index($list, $value);
+        @if (($index >= $begin) and ($index < $end)) {
+            $sliced-list: append($sliced-list, $value);
+        }
+    }
+    @return $sliced-list;
+}
+
+// _list-stringify((a, b, c), ' and ', '\"') =>  "a" and "b" and "c"
+@function _list-stringify($list, $separator: '', $enclosure: '', $ignore-last-separator: true) {
+    @if type-of($list) != list {
+        @return $list;
+    }
+
+    $result-string: '';
+    @each $value in $list {
+        $result-string: $result-string + $enclosure + $value + $enclosure + $separator;
+    }
+    @if $ignore-last-separator {
+        $result-string: str-slice($result-string, 1, (str-length($result-string) - str-length($separator)));
+    }
+    @return $result-string;
+}
+
+// ------------------------------
+// Numbers
+// ------------------------------
+
+@function _add-unit($number, $unit: px) {
+    @if unitless($number) {
+        @return $number + $unit;
+    } @else {
+        @return $number;
+    }
+}
+
+@function _remove-unit($number) {
+    @if (type-of($number) == number) and (not unitless($number)) {
+        @return $number / ($number * 0 + 1);
+    }
+    @return $number;
+}
+
+// ------------------------------
+// Strings
+// ------------------------------
+
+@function _str-has($string, $substring) {
+    @return str-index($string, $substring) != null;
+}
+
+@function _str-replace($string, $substring, $new-substring: '') {
+    $index: str-index($string, $substring);
+    @if $index {
+        $before: str-slice($string, 1, $index - 1);
+        $after: str-slice($string, ($index + str-length($substring)));
+        @return _str-replace(($before + $new-substring + $after), $substring, $new-substring);
+    } @else {
+        @return $string;
+    }
+}
+
+// _str-indexes('foo,bar,baz', ','); => (4 8)
+@function _str-indexes($string, $substring) {
+    @if not _str-has($string, $substring) {
+        @return null;
+    }
+
+    $condition: true;
+    $tmp-string: $string;
+    $indexes: ();
+    $before-index: 0;
+    @while $condition {
+        $index: str-index($tmp-string, $substring);
+        @if $index {
+            $indexes: append($indexes, $index + $before-index);
+            $before-index: $before-index + $index;
+            $tmp-string: str-slice($tmp-string, $index + 1);
+        } @else {
+            $condition: false;
+        }
+    }
+    @return $indexes;
+}
+
+// _str-split('foo,bar,baz', ','); => ("foo" "bar" "baz")
+@function _str-split($string, $separator) {
+    @if not _str-has($string, $separator) {
+        @return append((), $string);
+    }
+
+    $list: ();
+    $indexes: _str-indexes($string, $separator);
+    @for $i from 1 through length($indexes) {
+        $begin-index: 1;
+        $end-index: nth($indexes, 1) - 1;
+        @if $i > 1 {
+            $begin-index: nth($indexes, $i - 1) + 1;
+            $end-index: nth($indexes, $i) - 1;
+        }
+        $list: append($list, str-slice($string, $begin-index, $end-index));
+    }
+    $list: append($list, str-slice($string, _list-last($indexes) + 1));
+    @return $list;
+}
+
+// _str-slice-based-on-substr(abcdef, cd, 1, 2); => ef
+// _str-slice-based-on-substr(abcdef, cd, 1, 2, true); => ab
+@function _str-slice-based-on-substr($string, $base-substring, $begin_positive, $end_positive, $back: false) {
+    @if not _str-has($string, $base-substring) {
+        @return $string;
+    }
+
+    $index: str-index($string, $base-substring);
+    $base-substr-length: str-length($base-substring);
+    $begin-of-slice: $index + ($begin_positive - 1) + ($base-substr-length - 1) + 1;
+    $end-of-slice: $index + ($end_positive - 1) + ($base-substr-length - 1) + 1;
+
+    @if $back {
+        $begin-of-slice: $begin-of-slice - $base-substr-length - $end_positive;
+        $end-of-slice: $end-of-slice - $base-substr-length - $end_positive;
+        @return str-slice($string, $begin-of-slice, $end-of-slice);
+    }
+
+    @return str-slice($string, $begin-of-slice, $end-of-slice);
+}
+
+// _str-match('-0-1-2-3-', '-', '-'); => ("-0-", "-2-")
+@function _str-match($string, $begin-substring, $end-substring) {
+    $string-list: ();
+    $condition: true;
+
+    @while $condition {
+        $begin-of-slice: str-index($string, $begin-substring);
+
+        $end-of-slice: null;
+        @if $begin-of-slice {
+            $end-of-slice: str-index(str-slice($string, $begin-of-slice + 1), $end-substring);
+        }
+        @if $end-of-slice {
+            $end-of-slice: $begin-of-slice + $end-of-slice;
+        }
+
+        @if $begin-of-slice and $end-of-slice {
+            $matched-string: str-slice($string, $begin-of-slice, $end-of-slice);
+            $string-list: append($string-list, $matched-string);
+            $string: str-slice($string, $begin-of-slice + $end-of-slice);
+        } @else {
+            $condition: false;
+        }
+    }
+
+    @return _list-unique($string-list);
+}
+
+// ------------------------------
+// Maps
+// ------------------------------
+
+// _map-get-by-index((foo: 100, bar: 200), 2); => 200
+@function _map-get-by-index($map, $index) {
+    @return map-get($map, nth(map-keys($map), $index));
+}
+
+// _map-get-key((foo: 100, bar: 200), 2); => bar
+// _map-get-key((foo: 100, bar: 200), false, 200); => bar
+@function _map-get-key($map, $index: false, $value: false) {
+    $result-index: $index;
+    @if $value {
+        $result-index: index(map-values($map), $value);
+    }
+    @if not $result-index {
+        @return null;
+    }
+    @if $result-index > length(map-keys($map)) {
+        @return null;
+    }
+    @return nth(map-keys($map), $result-index);
+}
+
+// _map-set((foo: 100, bar: 200), baz, 300);
+// => (foo: 100, bar: 200, baz: 300)
+// _map-set((foo: 100, bar: 200), false, false, (baz: 300));
+// => (foo: 100, bar: 200, baz: 300)
+@function _map-set($map, $key: false, $value: false, $set-map: false) {
+    @if $set-map {
+        @return map-merge($map, $set-map);
+    }
+    @if $key and $value {
+        @return map-merge($map, (unquote($key): $value));
+    }
+    @return $map;
+}
+
+// _map-deep-get((foo: (bar: 100)), foo, bar); => 100
+@function _map-deep-get($map, $keys...) {
+    $first-key: nth($keys, 1);
+
+    @if length($keys) < 2 {
+        @return map-get($map, $first-key);
+    }
+
+    $value-by-first-key: map-get($map, $first-key);
+    @if type-of($value-by-first-key) == map {
+        $keys-after-two: _list-slice($keys, 2);
+        @return _map-deep-get($value-by-first-key, $keys-after-two...);
+    } @else {
+        @return $value-by-first-key;
+    }
+}
+
+// _map-deep-remove((foo: 100, bar: (foo: 200, bar: 300, baz: 400)), foo, baz);
+// => (bar: (bar: 300))
+@function _map-deep-remove($map, $keys...) {
+    @each $removed-key in $keys {
+        @each $m-key, $value in $map {
+            @if $removed-key == $m-key {
+                $map: map-remove($map, $removed-key);
+            }
+            @if ($removed-key != $m-key) and (type-of($value) == map) {
+                $map: map-merge($map, ($m-key: _map-deep-remove($value, $keys...)));
+            }
+        }
+    }
+    @return $map;
+}
+
+// _map-deep-keys((foo: 100, bar: (foo: 200, bar: 300, baz: 400)));
+// => (foo, bar, baz)
+@function _map-deep-keys($map, $keys: false) {
+    $current-keys: ();
+    @each $key, $value in $map {
+        $current-keys: append($current-keys, $key);
+
+        @if type-of($value) == map {
+            @each $key2 in _map-deep-keys($value, $current-keys) {
+                $current-keys: append($current-keys, $key2);
+            }
+        }
+    }
+    @return _list-unique($current-keys);
+}
+
+// _map-deep-values((foo: 100, bar: (foo: 200, bar: 300, baz: 400)));
+// => (100, 200, 300, 400)
+@function _map-deep-values($map, $values: false) {
+    $current-values: ();
+    @each $key, $value in $map {
+        @if type-of($value) == map {
+            @each $value2 in _map-deep-values($value, $current-values) {
+                $current-values: append($current-values, $value2);
+            }
+        } @else {
+            $current-values: append($current-values, $value);
+        }
+    }
+    @return _list-unique($current-values);
+}
+
+// _map-match(('-0-': '-1-', '-2-': (3: 4)), '-', '-');
+// => (-0-, -2-, -1-)
+@function _map-match($map, $begin-substring, $end-substring) {
+    $matched-string-list: ();
+
+    @each $key in _map-deep-keys($map) {
+        @each $matched-string in _str-match(#{$key}, $begin-substring, $end-substring) {
+            $matched-string-list: append($matched-string-list, $matched-string);
+        }
+    }
+    @each $value in _map-deep-values($map) {
+        @each $matched-string in _str-match(#{$value}, $begin-substring, $end-substring) {
+            $matched-string-list: append($matched-string-list, $matched-string);
+        }
+    }
+
+    @return _list-unique($matched-string-list);
+}

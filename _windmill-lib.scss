@@ -1,0 +1,264 @@
+// Return declarations that value has variables.
+//
+// wm-get-declarations-with-var((width: 1rem, height: '$size$'));
+// => (height: "$size$")
+@function wm-get-declarations-with-var($declarations) {
+    @each $property, $value in $declarations {
+        @if not _str-has(#{$value}, '$') {
+            $declarations: map-remove($declarations, $property);
+        }
+    }
+    @return $declarations;
+}
+
+// Return declarations that value has no variables.
+//
+// wm-get-declarations-without-var((width: 1rem, height: '$size$'));
+// => (width: 1rem)
+@function wm-get-declarations-without-var($declarations) {
+    @each $property, $value in $declarations {
+        @if _str-has(#{$value}, '$') {
+            $declarations: map-remove($declarations, $property);
+        }
+    }
+    @return $declarations;
+}
+
+@function wm-get-value($values, $value-variable, $value-name) {
+    @return _map-deep-get($values, $value-variable, $value-name);
+}
+
+@function wm-get-value-variables($values) {
+    @return _list-unique(map-keys($values));
+}
+
+@function wm-get-value-names($values) {
+    $value-names: ();
+    @each $key in _map-deep-keys($values) {
+        @if not _str-has(#{$key}, '$') {
+            $value-names: append($value-names, $key);
+        }
+    }
+    @return _list-unique($value-names);
+}
+
+// Return a map of (value-variable: value).
+//
+// Example:
+// $values: ('$width$': (1: 0.25rem, 2: 0.5rem, 3: 0.75rem))
+// $value-name: 1
+// => ($width$: 0.25rem)
+@function wm-get-var-and-value($values, $value-name) {
+    $var-and-value: ();
+    @each $var in wm-get-value-variables($values) {
+        $value: wm-get-value($values, $var, $value-name);
+        @if $value {
+            $var-and-value: _map-set($var-and-value, $var, $value);
+        }
+    }
+    @return $var-and-value;
+}
+
+// Replace $replacement in $selector based on $list,
+// group selector.
+//
+// wm-group-selector('.selector-VAL', VAL, (1, 2, 3));
+// => (".selector-1", ".selector-2", ".selector-3")
+@function wm-group-selector($selector, $replacement, $list) {
+    $grouping-selector: ();
+    @each $value in $list {
+        $grouping-selector: append($grouping-selector, _str-replace($selector, $replacement, $value), 'comma');
+    }
+    @return $grouping-selector;
+}
+
+@function wm-get-min-breakpoint-name($breakpoints) {
+    $min-breakpoint: _map-get-by-index($breakpoints, 1);
+    @each $breakpoint in map-values($breakpoints) {
+        @if $breakpoint < $min-breakpoint {
+            $min-breakpoint: $breakpoint;
+        }
+    }
+    @return _map-get-key($breakpoints, $index: false, $value: $min-breakpoint);
+}
+
+@function wm-remove-min-breakpoint-from-selector($selector, $breakpoints, $breakpoint-name) {
+    @if $wm-min-breakpoint-prefix {
+        @return $selector;
+    }
+    @if $breakpoint-name != wm-get-min-breakpoint-name($breakpoints) {
+        @return $selector;
+    }
+
+    $removed-addition-str: _str-slice-based-on-substr(
+            $selector, #{$breakpoint-name}, 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
+    );
+    $replacement-str: '';
+    @if $wm-min-breakpoint-addition > 0 {
+        $replacement-str: $breakpoint-name + $removed-addition-str;
+    } @else {
+        $replacement-str: $removed-addition-str + $breakpoint-name
+    }
+    @return _str-replace($selector, $replacement-str, '');
+}
+
+// Get value based on $value-name and $values of (value-variable: (value-name: value)),
+// push it to value-variable in $declarations of (property: value-variable).
+//
+// Example:
+// $declarations: (
+//     width:  '$width$',
+//     height: '$height$'
+// )
+// $values: (
+//     '$width':   (1: 1rem, 2: 2rem, 3: 3rem),
+//     '$height$': (1: 10px, 2: 20px, 3: 30px)
+// )
+// $value-name: 1
+// => (width: 1rem, height: 10px)
+@function wm-push-value-to-declarations($declarations, $values, $value-name) {
+    // Push value in $values to value-variable in $declarations.
+    $declarations-pushed-value: $declarations;
+    @each $var, $value in wm-get-var-and-value($values, $value-name) {
+        @each $property, $dec-value in $declarations-pushed-value {
+            @if _str-has(#{$dec-value}, $var) {
+                $declarations-pushed-value: _map-set($declarations-pushed-value, $property, _str-replace(#{$dec-value}, $var, #{$value}));
+            }
+        }
+    }
+
+    // Remove declarations that has the remaining variables.
+    $declarations-pushed-value: wm-get-declarations-without-var($declarations-pushed-value);
+
+    @return $declarations-pushed-value;
+}
+
+@mixin wm-output-declarations($declarations) {
+    @each $property, $value in $declarations {
+        #{$property}: #{$value};
+    }
+}
+
+// If breakpoint < 1, output styles to outside @media block.
+@mixin wm-mq($from) {
+    @if _remove-unit($from) <= 0 {
+        @content;
+    } @else {
+        @media (min-width: _add-unit($from, px)) {
+            @content;
+        }
+    }
+}
+
+@mixin wm-warn-var-number-mismatch($declarations, $values) {
+    $declarations-vars: _map-match($declarations, '$', '$');
+    $values-vars: _map-match($values, '$', '$');
+
+    // Variables that $values has and $declarations doesn't have.
+    $missing-declarations-vars: ();
+    @each $var in $values-vars {
+        @if not _list-has($declarations-vars, $var) {
+            $missing-declarations-vars: append($missing-declarations-vars, $var);
+        }
+    }
+
+    // Variables that $values doesn't have and $declarations has.
+    $missing-values-vars: ();
+    @each $var in $declarations-vars {
+        @if not _list-has($values-vars, $var) {
+            $missing-values-vars: append($missing-values-vars, $var);
+        }
+    }
+
+    @if length($missing-declarations-vars) > 0 {
+        @warn '$declarations argument of #{$wm-mixin-name}() is missing variable #{_list-stringify(_list-unique($missing-declarations-vars), ' and ', '\"')}.';
+    }
+    @if length($missing-values-vars) > 0 {
+        @warn '$values argument of #{$wm-mixin-name}() is missing variable #{_list-stringify(_list-unique($missing-values-vars), ' and ', '\"')}.';
+    }
+}
+
+// If selector contains $search,
+// return list of that selector.
+@function wm-validate-selector($selector, $search) {
+    $selectors-without-search: ();
+    @each $one-selector in _str-split(#{$selector}, ',') {
+        @if not _str-has(#{$one-selector}, $search) {
+            $selectors-without-search: append($selectors-without-search, $one-selector);
+        }
+    }
+    @return $selectors-without-search;
+}
+
+// If there is exception, warn it and return false.
+@function wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable) {
+    @if $disable {
+        @return false;
+    }
+
+    // If $selector is missing.
+    @if (not $selector) or ($selector == '') {
+        @warn '#{$wm-mixin-name}() needs $selector argument, or call like \".your-selector { @include #{$wm-mixin-name}(...) { ... } }\".';
+        @return false;
+    }
+
+    // If contain no $wm-breakpoint-placeholder in selector.
+    @if $breakpoints and (length(wm-validate-selector($selector, $wm-breakpoint-placeholder)) > 0) {
+        $eg: '.#{$wm-breakpoint-placeholder}-your-selector';
+        @warn '#{$wm-mixin-name}() needs "#{$wm-breakpoint-placeholder}" string in selector. e.g., "#{$eg}".';
+        @return false;
+    }
+
+    // If contain no $wm-value-placeholder in selector.
+    @if $values and (length(wm-validate-selector($selector, $wm-value-placeholder)) > 0) {
+        $eg: '.your-selector-#{$wm-value-placeholder}';
+        @warn '#{$wm-mixin-name}() needs "#{$wm-value-placeholder}" string in selector. e.g., "#{$eg}".';
+        @return false;
+    }
+
+    // If only take $values.
+    @if $values and (not $declarations) {
+        $eg: '@include #{$wm-mixin-name}($declarations: (property: \'#{nth(wm-get-value-variables($values), 1)}\')) { ... }';
+        @warn '#{$wm-mixin-name}() needs $declarations argument. e.g., "#{$eg}".';
+        @return false;
+    }
+
+    @return true;
+}
+
+// Output only styles that contain no variables in the declaration.
+@mixin output-styles-without-var($selector, $breakpoints, $breakpoint-name, $declarations, $values) {
+    // group selector based on value-name.
+    //
+    // Example:
+    // selector: foo-VAL
+    // value names: (1, 2, 3)
+    // => ".foo-1, .foo-2, .foo-3"
+    @if $values {
+        $selector: wm-group-selector($selector, $wm-value-placeholder, wm-get-value-names($values));
+    }
+    @if $breakpoints {
+        $selector: _str-replace(#{$selector}, $wm-breakpoint-placeholder, $breakpoint-name);
+    }
+    @if $breakpoints and $breakpoint-name {
+        $selector: wm-remove-min-breakpoint-from-selector($selector, $breakpoints, $breakpoint-name);
+    }
+    @at-root #{$selector} {
+        @include wm-output-declarations(wm-get-declarations-without-var($declarations));
+        @content;
+    }
+}
+
+// Output only styles that contain variables in the declaration.
+@mixin output-styles-with-var($selector, $breakpoints, $breakpoint-name, $declarations, $values, $value-name) {
+    @if $breakpoints {
+        $selector: _str-replace(#{$selector}, $wm-breakpoint-placeholder, $breakpoint-name);
+    }
+    @if $breakpoints and $breakpoint-name {
+        $selector: wm-remove-min-breakpoint-from-selector($selector, $breakpoints, $breakpoint-name);
+    }
+    $selector: _str-replace(#{$selector}, $wm-value-placeholder, $value-name);
+    @at-root #{$selector} {
+        @include wm-output-declarations(wm-push-value-to-declarations(wm-get-declarations-with-var($declarations), $values, $value-name));
+    }
+}
