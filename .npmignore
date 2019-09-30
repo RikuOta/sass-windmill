@@ -4,3 +4,5 @@ node_modules
 .sass-cache
 *.css.map
 index.css
+index.scss
+.travis.yml

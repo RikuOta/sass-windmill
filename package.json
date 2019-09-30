@@ -1,0 +1,34 @@
+{
+  "name": "sass-windmill",
+  "description": "Provides a windmill() Sass mixin, help to define utility classes like .mb-10px flexibly and simply.",
+  "version": "1.0.0",
+  "keywords": [
+    "helper",
+    "media",
+    "mediaquery",
+    "mixin",
+    "query",
+    "queries",
+    "responsive",
+    "sass",
+    "scss",
+    "utility"
+  ],
+  "main": "_windmill.scss",
+  "scripts": {
+    "build": "node-sass index.scss index.css --output-style expanded",
+    "start": "node-sass index.scss index.css --output-style expanded -w"
+  },
+  "bugs": {
+    "url": "https://github.com/RikuOta/sass-windmill/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RikuOta/sass-windmill.git"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/RikuOta/sass-windmill#readme",
+  "devDependencies": {
+    "node-sass": "^4.12.0"
+  }
+}
