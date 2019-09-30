@@ -1,4 +1,4 @@
-#Sass Windmill
+# Sass Windmill
 
 Provides a `windmill()` [Sass](https://sass-lang.com/) mixin, help to define utility classes like `.mb-10px` flexibly and simply.
 
@@ -109,7 +109,7 @@ Compiles to:
 
 <!-- [Use at CodePen immediately.](https://) -->
 
-##Install
+## Install
 
 ```
 npm i sass-windmill
@@ -127,7 +127,7 @@ sass-windmill/
     └── _windmill-lib.scss
 ```
 
-##Usage
+## Usage
 
 1. Import the partial in your Sass files and override default settings with your own preferences.
 
@@ -173,7 +173,7 @@ sass-windmill/
 
 1. Call with `windmill()` (see below).
 
-###Selector
+### Selector
 
 Use with selector or take `$selector` argument.
 
@@ -189,7 +189,7 @@ Use with selector or take `$selector` argument.
 ) { }
 ```
 
-###Breakpoints
+### Breakpoints
 
 - Set `$wm-breakpoints` global variable or take `$breakpoints` argument.  
 - Key name of breakpoints replace the "SCR" string in selector.  
@@ -242,7 +242,7 @@ If you make responsive design, use smaller breakpoint as base and overwrite it w
 <div class="your-selector md-your-selector xl-your-selector"></div>
 ```
 
-###Generate styles
+### Generate styles
 
 Define declarations with @content block or `$declarations` argument.
 
@@ -302,7 +302,7 @@ Compiles to:
 }
 ```
 
-###Generate styles (with value-variable)
+### Generate styles (with value-variable)
 
 - `$declarations` argument accepts value-variable of `$variable$`.  
 If you use value-variable, define `$values` argument together as below.  
@@ -396,7 +396,7 @@ Compiles to:
 }
 ```
 
-###Generate styles (mixed with value-variable)
+### Generate styles (mixed with value-variable)
 
 - If declarations that has value-variable and not has value-variable are mixed, `windmill()` output declarations that has not value-variable as grouping selector.
 
@@ -528,9 +528,9 @@ Compiles to:
 }
 ```
 
-###Other arguments
+### Other arguments
 
-####Remove
+#### Remove
 You can remove specific value-name in `$values` argument.
 
 ```scss
@@ -602,7 +602,7 @@ Compiles to:
 }
 ```
 
-####Disable
+#### Disable
 
 If true, output no styles.
 
@@ -628,6 +628,6 @@ $wm-breakpoints: (
 
 <!-- [Use at CodePen immediately.](https://) -->
 
-##License
+## License
 
 This software is released under the MIT License, see [LICENSE](https://github.com/RikuOta/sass-windmill/blob/master/LICENSE).
