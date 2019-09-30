@@ -115,7 +115,7 @@ npm i sass-windmill
 
 or
 
-[Download sass-windmill](https://github.com/RikuOta/sass-windmill/archive/master.zip) into your Sass project.  
+[Download sass-windmill](https://github.com/RikuOta/sass-windmill) into your Sass project.  
 The target is 3 files.
 
 ```text
