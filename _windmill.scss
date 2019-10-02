@@ -73,10 +73,14 @@ $wm-mixin-name: windmill;
     //
     // If take $value, have to contain $wm-value-placeholder.
     // Example: .size-VAL
-    $selector: #{&},
+    $selector: null,
 
     $breakpoints: $wm-breakpoints
 ) {
+    @if not $selector {
+        $selector: #{&};
+    }
+
     $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
 
     @if $no-exception {
