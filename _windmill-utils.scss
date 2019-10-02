@@ -87,6 +87,14 @@
     }
 }
 
+// _str-remove(foobarbaz, foo, baz); => bar
+@function _str-remove($string, $substrings...) {
+    @each $substring in $substrings {
+        $string: _str-replace($string, $substring, '');
+    }
+    @return $string;
+}
+
 // _str-indexes('foo,bar,baz', ','); => (4 8)
 @function _str-indexes($string, $substring) {
     @if not _str-has($string, $substring) {

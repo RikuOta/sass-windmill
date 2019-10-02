@@ -122,7 +122,7 @@
     @each $var, $value in wm-get-var-and-value($values, $value-name) {
         @each $property, $dec-value in $declarations-pushed-value {
             @if _str-has(#{$dec-value}, $var) {
-                $declarations-pushed-value: _map-set($declarations-pushed-value, $property, _str-replace(#{$dec-value}, $var, #{$value}));
+                $declarations-pushed-value: _map-set($declarations-pushed-value, $property, _str-replace(_str-remove(#{$dec-value}, '\'', '\"'), $var, $value));
             }
         }
     }
