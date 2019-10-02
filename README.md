@@ -303,7 +303,8 @@ Compiles to:
 
 ### Generate styles (with value-variable)
 
-- `$declarations` argument accepts value-variable of `'$variable$'`, If use, have to take `$values` argument together.
+- `$declarations` argument accepts value-variable of `$variable$`.  
+If use it, have to take `$values` argument together.
 - `$values` argument expects a map of (value-variable: (value-name: value)).
 - The value-name replace the "VAL" string in selector.  
 (You can change "VAL" string by `$wm-value-placeholder` global variable).

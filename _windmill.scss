@@ -11,7 +11,7 @@
 // A map of (breakpoint-name: minimum screen width),
 // order from small to large.
 $wm-breakpoints: (
-    all: 0px, // Output to outside @media block.
+    all: 0px,
     sm: 576px,
     md: 768px,
     lg: 992px,
@@ -34,7 +34,7 @@ $wm-value-placeholder: VAL !default;
 $wm-min-breakpoint-prefix: false !default;
 
 // When $wm-min-breakpoint-prefix is false,
-// number of strings that delete together from selector.
+// number of strings that delete from selector together.
 //
 // Example:
 // Selector: .foo-SCR-bar
@@ -53,7 +53,7 @@ $wm-mixin-name: windmill;
 
 @mixin windmill(//
     // A map of (property: value),
-    // value can contains value-variable of "$variable-name$".
+    // value can contains value-variable of "$variable$".
     // Example: (width: 1rem, height: '$size$')
     $declarations: null,
 
