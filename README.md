@@ -107,6 +107,8 @@ Compiles to:
 }
 ```
 
+[Try it immediately at CodePen.](https://codepen.io/RikuOta/pen/qBWzpwW)
+
 ## Install
 
 ```
