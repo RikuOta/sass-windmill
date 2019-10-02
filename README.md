@@ -135,7 +135,7 @@ sass-windmill/
     // A map of (breakpoint-name: minimum screen width),
     // order from small to large.
     $wm-breakpoints: (
-        all: 0px, // Output outside @media block.
+        all: 0px,
         sm: 576px,
         md: 768px,
         lg: 992px,
@@ -158,7 +158,7 @@ sass-windmill/
     $wm-min-breakpoint-prefix: false;
 
     // When $wm-min-breakpoint-prefix is false,
-    // number of strings that delete together from selector.
+    // number of strings that delete from selector together.
     //
     // Example:
     // Selector: .foo-SCR-bar
@@ -169,14 +169,14 @@ sass-windmill/
     $wm-min-breakpoint-addition: 1;
     ```
 
-1. Call with `windmill()` (see below).
+1. Call (see below).
 
 ### Selector
 
-Use with selector or take `$selector` argument.
+Call with selector or take `$selector` argument.
 
 ```scss
-// Use with selector.
+// Call with selector.
 .your-selector {
     @include windmill() { }
 }
@@ -192,7 +192,7 @@ Use with selector or take `$selector` argument.
 - Set `$wm-breakpoints` global variable or take `$breakpoints` argument.
 - Breakpoints is a map of (breakpoint-name: minimum screen width), order from small to large.  
 - The breakpoint-name replace the "SCR" string in selector.  
-("SCR" === `$wm-breakpoint-placeholder`).
+(You can change "SCR" string by `$wm-breakpoint-placeholder` global variable).
 - If breakpoint < 1, output styles to outside @media block.
 
  ```scss
@@ -304,9 +304,9 @@ Compiles to:
 ### Generate styles (with value-variable)
 
 - `$declarations` argument accepts value-variable of `'$variable$'`, If use, have to take `$values` argument together.
-- `$values` argument expects a map of (value-variable: (value-name: value).
+- `$values` argument expects a map of (value-variable: (value-name: value)).
 - The value-name replace the "VAL" string in selector.  
-("VAL" === `$wm-value-placeholder`).
+(You can change "VAL" string by `$wm-value-placeholder` global variable).
 
 ```scss
 $wm-breakpoints: (
@@ -320,10 +320,10 @@ $wm-breakpoints: (
 .SCR-your-selector-VAL {
     @include windmill(
         $declarations: (
-            margin-bottom: '$any-string$' // Match.
+            margin-bottom: '$any-string$'
         ),
         $values: (
-            '$any-string$': ( // Match.
+            '$any-string$': (
                 1: 0.25rem,
                 2: 0.5rem,
                 3: 0.75rem
@@ -533,71 +533,26 @@ Compiles to:
 You can remove specific value-name in `$values` argument.
 
 ```scss
-$wm-breakpoints: (
-    all: 0px,
-    sm: 576px,
-    md: 768px,
-    lg: 992px,
-    xl: 1200px
-);
-
 .SCR-your-selector-VAL {
     @include windmill(
+        $remove: (1, 3),
         $declarations: (
             width: '$width$',
             height: '$height$'
         ),
         $values: (
             '$width$': (
-                1: 1rem,
+                1: 1rem, // Remove.
                 2: 2rem,
-                3: 3rem
+                3: 3rem  // Remove.
             ),
             '$height$': (
-                1: 10px,
+                1: 10px, // Remove.
                 2: 20px,
-                3: 30px
+                3: 30px  // Remove.
             )
-        ),
-        $remove: (1, 3)
+        )
     );
-}
-```
-
-Compiles to:
-
-```css
-.your-selector-2 {
-  width: 2rem;
-  height: 20px;
-}
-
-@media (min-width: 576px) {
-  .sm-your-selector-2 {
-    width: 2rem;
-    height: 20px;
-  }
-}
-
-@media (min-width: 768px) {
-  .md-your-selector-2 {
-    width: 2rem;
-    height: 20px;
-  }
-}
-
-@media (min-width: 992px) {
-  .lg-your-selector-2 {
-    width: 2rem;
-    height: 20px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .xl-your-selector-2 {
-    width: 2rem;
-    height: 20px;
-  }
 }
 ```
 
