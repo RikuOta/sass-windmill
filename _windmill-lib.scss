@@ -178,16 +178,20 @@
     }
 }
 
-// If selector contains $search,
-// return list of that selector.
-@function wm-validate-selector($selector, $search) {
-    $selectors-without-search: ();
+// Return list of selector.
+// If $contain is true, selector that contains $substr.
+// If $contain is false, selector that contains no $substr.
+@function wm-validate-selector($selector, $substr, $contain) {
+    $selectors: ();
+
+    // Iterate for grouping selector like ".foo, .bar, .baz { }".
     @each $one-selector in _str-split(#{$selector}, ',') {
-        @if not _str-has(#{$one-selector}, $search) {
-            $selectors-without-search: append($selectors-without-search, $one-selector);
+        $one-selector: _str-remove($one-selector, ' ');
+        @if _str-has(#{$one-selector}, $substr) == $contain {
+            $selectors: append($selectors, $one-selector);
         }
     }
-    @return $selectors-without-search;
+    @return $selectors;
 }
 
 // If there is exception, warn it and return false.
@@ -203,16 +207,28 @@
     }
 
     // If contain no $wm-breakpoint-placeholder in selector.
-    @if $breakpoints and (length(wm-validate-selector($selector, $wm-breakpoint-placeholder)) > 0) {
+    @if $breakpoints and (length(wm-validate-selector($selector, $wm-breakpoint-placeholder, false)) > 0) {
         $eg: '.#{$wm-breakpoint-placeholder}-your-selector';
         @warn '#{$wm-mixin-name}() needs "#{$wm-breakpoint-placeholder}" string in selector. e.g., "#{$eg}".';
         @return false;
     }
 
     // If contain no $wm-value-placeholder in selector.
-    @if $values and (length(wm-validate-selector($selector, $wm-value-placeholder)) > 0) {
+    @if $values and (length(wm-validate-selector($selector, $wm-value-placeholder, false)) > 0) {
         $eg: '.your-selector-#{$wm-value-placeholder}';
         @warn '#{$wm-mixin-name}() needs "#{$wm-value-placeholder}" string in selector. e.g., "#{$eg}".';
+        @return false;
+    }
+
+    // If contain $wm-breakpoint-placeholder in selector.
+    @if (not $breakpoints) and (length(wm-validate-selector($selector, $wm-breakpoint-placeholder, true)) > 0) {
+        @warn 'Selector "#{$selector}" contains "#{$wm-breakpoint-placeholder}" string.';
+        @return false;
+    }
+
+    // If contain $wm-value-placeholder in selector.
+    @if (not $values) and (length(wm-validate-selector($selector, $wm-value-placeholder, true)) > 0) {
+        @warn 'Selector "#{$selector}" contains "#{$wm-value-placeholder}" string.';
         @return false;
     }
 
