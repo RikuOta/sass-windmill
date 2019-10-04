@@ -24,12 +24,34 @@
     @return $declarations;
 }
 
+@function wm-make-declarations-with-shorthand($declarations) {
+    @if $declarations and (type-of($declarations) == string) {
+        @return ($declarations: '$val$');
+    }
+    @if $declarations and (type-of($declarations) == list) {
+        $property: nth($declarations, 1);
+        $is-important: nth($declarations, 2);
+        $important-frag: '';
+        @if $is-important {
+            $important-frag: ' !important';
+        }
+        @return ($property: '$val$' + $important-frag);
+    }
+    @return $declarations;
+}
+
 @function wm-get-value($values, $value-variable, $value-name) {
     @return _map-deep-get($values, $value-variable, $value-name);
 }
 
-@function wm-get-value-variables($values) {
-    @return _list-unique(map-keys($values));
+@function wm-get-value-vars($values) {
+    $vars: ();
+    @each $var in map-keys($values) {
+        @if _str-has(#{$var}, '$') {
+            $vars: append($vars, $var);
+        }
+    }
+    @return _list-unique($vars);
 }
 
 @function wm-get-value-names($values) {
@@ -50,13 +72,20 @@
 // => ($width$: 0.25rem)
 @function wm-get-var-and-value($values, $value-name) {
     $var-and-value: ();
-    @each $var in wm-get-value-variables($values) {
+    @each $var in wm-get-value-vars($values) {
         $value: wm-get-value($values, $var, $value-name);
         @if $value {
             $var-and-value: _map-set($var-and-value, $var, $value);
         }
     }
     @return $var-and-value;
+}
+
+@function wm-make-values-with-shorthand($values) {
+    @if $values and (length(wm-get-value-vars($values)) < 1) {
+        @return ('$val$': $values);
+    }
+    @return $values;
 }
 
 // Replace $replacement in $selector based on $list,
@@ -234,7 +263,7 @@
 
     // If only take $values.
     @if $values and (not $declarations) {
-        $eg: '@include #{$wm-mixin-name}($declarations: (property: \'#{nth(wm-get-value-variables($values), 1)}\')) { ... }';
+        $eg: '@include #{$wm-mixin-name}($declarations: (property: \'#{nth(wm-get-value-vars($values), 1)}\')) { ... }';
         @warn '#{$wm-mixin-name}() needs $declarations argument. e.g., "#{$eg}".';
         @return false;
     }

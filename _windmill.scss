@@ -80,11 +80,11 @@ $wm-mixin-name: windmill;
     @if not $selector {
         $selector: #{&};
     }
+    $declarations: wm-make-declarations-with-shorthand($declarations);
+    $values: wm-make-values-with-shorthand($values);
 
     $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
-
     @if $no-exception {
-
         // Remove specific value-name in $values.
         @if $remove and $values {
             @each $remove-value in $remove {
