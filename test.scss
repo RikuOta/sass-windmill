@@ -1,0 +1,112 @@
+@import './windmill';
+
+$wm-breakpoints: (
+    all: 0,
+    pc: 769px
+);
+$wm-min-breakpoint-prefix: false;
+$wm-min-breakpoint-addition: 1;
+
+$spaces: (
+    1: 1rem,
+    2: 2rem,
+    3: 3rem
+);
+
+$wm-valid-test-nums: all;
+
+@mixin windmill-test($args...) {
+    @if $wm-valid-test-nums == all {
+        @include windmill($args...) {
+            @content;
+        }
+    } @else {
+        @each $test-num in $wm-valid-test-nums {
+            $expect-selector-str: test + $test-num;
+            @if _str-has(#{&}, $expect-selector-str) {
+                @include windmill($args...) {
+                    @content;
+                }
+            }
+        }
+    }
+}
+
+/* @content */
+.test1 {
+    @include windmill-test(
+        $breakpoints: false
+    ) {
+        display: block;
+    }
+}
+
+/* $declarations */
+.test2 {
+    @include windmill-test(
+        $breakpoints: false,
+        $declarations: (display: block)
+    );
+}
+
+/* @content, breakpoints */
+.SCR-test3 {
+    @include windmill-test() {
+        display: block;
+    }
+}
+
+/* $declarations, breakpoints */
+.SCR-test4 {
+    @include windmill-test(
+        $declarations: (display: block)
+    );
+}
+
+/* value-variable */
+.test5-VAL {
+    @include windmill-test(
+        $declarations: (margin: -'$val$'),
+        $values: ('$val$': $spaces),
+        $breakpoints: false
+    );
+}
+
+/* value-variable, breakpoints */
+.SCR-test6-VAL {
+    @include windmill-test(
+        $declarations: (margin: '$val$'),
+        $values: ('$val$': $spaces)
+    );
+}
+
+/* value-variable and no value-variable */
+.test7-VAL {
+    @include windmill-test(
+        $declarations: (margin: '$val$', content: 'foo'),
+        $values: ('$val$': $spaces),
+        $breakpoints: false
+    ) {
+        content: 'bar'
+    }
+}
+
+/* value-variable and no value-variable, breakpoints */
+.SCR-test8-VAL {
+    @include windmill-test(
+        $declarations: (margin: '$val$', content: 'foo'),
+        $values: ('$val$': $spaces)
+    ) {
+        content: 'bar'
+    }
+}
+
+/* shorthand */
+.SCR-test9-VAL {
+    @include windmill-test(margin, $spaces);
+}
+
+/* shorthand, important */
+.SCR-test10-VAL {
+    @include windmill-test((margin,false), $spaces);
+}
