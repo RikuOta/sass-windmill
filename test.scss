@@ -1,112 +1,164 @@
 @import './windmill';
 
+// Override default settings.
 $wm-breakpoints: (
     all: 0,
     pc: 769px
 );
+$wm-breakpoint-placeholder: SCR;
+$wm-value-placeholder: VAL;
 $wm-min-breakpoint-prefix: false;
 $wm-min-breakpoint-addition: 1;
 
-$spaces: (
-    1: 1rem,
-    2: 2rem,
-    3: 3rem
-);
+// Test preference.
+$valid-test-nums: 2;
+$is-all-test-valid: true;
 
-$wm-valid-test-nums: all;
-
-@mixin windmill-test($args...) {
-    @if $wm-valid-test-nums == all {
+$current-test-num: 0 !default;
+@mixin test_windmill($args...) {
+    @if $is-all-test-valid {
         @include windmill($args...) {
             @content;
         }
     } @else {
-        @each $test-num in $wm-valid-test-nums {
-            $expect-selector-str: test + $test-num;
-            @if _str-has(#{&}, $expect-selector-str) {
+        @each $valid-test-num in $valid-test-nums {
+            @if $valid-test-num == $current-test-num {
                 @include windmill($args...) {
                     @content;
                 }
             }
         }
     }
+    $current-test-num: $current-test-num + 1 !global;
 }
 
-/* @content */
-.test1 {
-    @include windmill-test(
+$test_values: (
+    1: 'test value 1',
+    2: 'test value 2',
+    3: 'test value 3'
+);
+
+/* ------------------------------
+Take $selector without breakpoints
+------------------------------ */
+@include test_windmill(
+    $selector: '.test',
+    $breakpoints: false
+) {
+    content: 'test'
+}
+
+/* ------------------------------
+Take $selector with breakpoints
+------------------------------ */
+
+@include test_windmill(
+    $selector: '.SCR-test',
+    $breakpoints: $wm-breakpoints
+) {
+    content: 'test'
+}
+
+/* ------------------------------
+Use @content without breakpoints
+------------------------------ */
+.test {
+    @include test_windmill(
         $breakpoints: false
     ) {
-        display: block;
+        content: 'test'
     }
 }
 
-/* $declarations */
-.test2 {
-    @include windmill-test(
-        $breakpoints: false,
-        $declarations: (display: block)
-    );
-}
-
-/* @content, breakpoints */
-.SCR-test3 {
-    @include windmill-test() {
-        display: block;
+/* ------------------------------
+Use @content with breakpoints
+------------------------------ */
+.SCR-test {
+    @include test_windmill(
+        $breakpoints: $wm-breakpoints
+    ) {
+        content: 'test'
     }
 }
 
-/* $declarations, breakpoints */
-.SCR-test4 {
-    @include windmill-test(
-        $declarations: (display: block)
-    );
-}
-
-/* value-variable */
-.test5-VAL {
-    @include windmill-test(
-        $declarations: (margin: -'$val$'),
-        $values: ('$val$': $spaces),
+/* ------------------------------
+Take $declarations without breakpoints
+------------------------------ */
+.test {
+    @include test_windmill(
+        $declarations: (content: 'test'),
         $breakpoints: false
     );
 }
 
-/* value-variable, breakpoints */
-.SCR-test6-VAL {
-    @include windmill-test(
-        $declarations: (margin: '$val$'),
-        $values: ('$val$': $spaces)
+/* ------------------------------
+Take $declarations with breakpoints
+------------------------------ */
+.SCR-test {
+    @include test_windmill(
+        $declarations: (content: 'test'),
+        $breakpoints: $wm-breakpoints
     );
 }
 
-/* value-variable and no value-variable */
-.test7-VAL {
-    @include windmill-test(
-        $declarations: (margin: '$val$', content: 'foo'),
-        $values: ('$val$': $spaces),
+/* ------------------------------
+Use value-variable without breakpoints
+------------------------------ */
+.test-VAL {
+    @include test_windmill(
+        $declarations: (content: '$val$'),
+        $values: ('$val$': $test_values),
+        $breakpoints: false
+    );
+}
+
+/* ------------------------------
+Use value-variable with breakpoints
+------------------------------ */
+.SCR-test-VAL {
+    @include test_windmill(
+        $declarations: (content: '$val$'),
+        $values: ('$val$': $test_values),
+        $breakpoints: $wm-breakpoints
+    );
+}
+
+/* ------------------------------
+Mixed with value-variable, without breakpoints
+------------------------------ */
+.test-VAL {
+    @include test_windmill(
+        $declarations: (content: '$val$'),
+        $values: ('$val$': $test_values),
         $breakpoints: false
     ) {
-        content: 'bar'
+        content: 'foo'
     }
 }
 
-/* value-variable and no value-variable, breakpoints */
-.SCR-test8-VAL {
-    @include windmill-test(
-        $declarations: (margin: '$val$', content: 'foo'),
-        $values: ('$val$': $spaces)
+/* ------------------------------
+Mixed with value-variable, with breakpoints
+------------------------------ */
+.SCR-test-VAL {
+    @include test_windmill(
+        $declarations: (content: '$val$'),
+        $values: ('$val$': $test_values),
+        $breakpoints: $wm-breakpoints
     ) {
-        content: 'bar'
+        content: 'foo'
     }
 }
 
-/* shorthand */
-.SCR-test9-VAL {
-    @include windmill-test(margin, $spaces);
+/* ------------------------------
+Use shorthand
+------------------------------ */
+.SCR-test-VAL {
+    @include test_windmill(content, $test_values);
 }
 
-/* shorthand, important */
-.SCR-test10-VAL {
-    @include windmill-test((margin,false), $spaces);
+/* ------------------------------
+Use shorthand with important frag
+------------------------------ */
+.SCR-test-VAL {
+    @include test_windmill((content, true), $test_values);
 }
