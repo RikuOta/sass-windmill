@@ -2,17 +2,15 @@
 
 Provides a `windmill()` [Sass](https://sass-lang.com/) mixin, help to define utility classes like `.mb-10px` flexibly and simply.
 
-  - [Install](#install)
-  - [Usage](#usage)
-      - [Selector](#selector)
-      - [Breakpoints](#breakpoints)
-      - [Generate styles](#generate-styles)
-      - [Generate styles (with value-variable)](#generate-styles-with-value-variable)
-      - [Generate styles (mixed with value-variable)](#generate-styles-mixed-with-value-variable)
-      - [Other arguments](#other-arguments)
-        - [Remove](#remove)
-        - [Disable](#disable)
-  - [License](#license)
+- [How to get started](#how-to-get-started)
+- [Usage](#usage)
+  - [Breakpoints](#breakpoints)
+  - [Generate styles](#generate-styles)
+  - [Other arguments](#other-arguments)
+    - [$remove](#remove)
+    - [$disable](#disable)
+    - [$selector](#selector)
+- [License](#license)
 
 Basic example:
 
@@ -22,24 +20,22 @@ Basic example:
 $wm-breakpoints: (
     all: 0,
     sm: 576px,
-    md: 768px,
-    lg: 992px,
-    xl: 1200px
+    md: 768px
 );
 
 $your-project-spaces: (
-    1: 0.25rem,
-    2: 0.5rem,
-    3: 0.75rem
+    1: 1rem,
+    2: 2rem,
+    3: 3rem
 );
 
 .SCR-mb-VAL {
     @include windmill(
         $declarations: (
-            margin-bottom: '$any-string$'
+            margin-bottom: '$val$'
         ),
         $values: (
-            '$any-string$': $your-project-spaces
+            '$val$': $your-project-spaces
         )
     );
 }
@@ -49,85 +45,61 @@ Compiles to:
 
 ```css
 .mb-1 {
-  margin-bottom: 0.25rem;
+  margin-bottom: 1rem;
 }
 .mb-2 {
-  margin-bottom: 0.5rem;
+  margin-bottom: 2rem;
 }
 .mb-3 {
-  margin-bottom: 0.75rem;
+  margin-bottom: 3rem;
 }
 
 @media (min-width: 576px) {
   .sm-mb-1 {
-    margin-bottom: 0.25rem;
+    margin-bottom: 1rem;
   }
   .sm-mb-2 {
-    margin-bottom: 0.5rem;
+    margin-bottom: 2rem;
   }
   .sm-mb-3 {
-    margin-bottom: 0.75rem;
+    margin-bottom: 3rem;
   }
 }
 
 @media (min-width: 768px) {
   .md-mb-1 {
-    margin-bottom: 0.25rem;
+    margin-bottom: 1rem;
   }
   .md-mb-2 {
-    margin-bottom: 0.5rem;
+    margin-bottom: 2rem;
   }
   .md-mb-3 {
-    margin-bottom: 0.75rem;
-  }
-}
-
-@media (min-width: 992px) {
-  .lg-mb-1 {
-    margin-bottom: 0.25rem;
-  }
-  .lg-mb-2 {
-    margin-bottom: 0.5rem;
-  }
-  .lg-mb-3 {
-    margin-bottom: 0.75rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .xl-mb-1 {
-    margin-bottom: 0.25rem;
-  }
-  .xl-mb-2 {
-    margin-bottom: 0.5rem;
-  }
-  .xl-mb-3 {
-    margin-bottom: 0.75rem;
+    margin-bottom: 3rem;
   }
 }
 ```
 
-[Try it immediately at CodePen.](https://codepen.io/RikuOta/pen/qBWzpwW)
+## How to get started
 
-## Install
+[Try it immediately on CodePen.](https://codepen.io/RikuOta/pen/qBWzpwW)
 
-```
-npm i sass-windmill
-```
+OR:
 
-or
+1. Install:
 
-[Download sass-windmill](https://github.com/RikuOta/sass-windmill) into your Sass project.  
-The target is 3 files.
+    ```
+    npm i sass-windmill
+    ```
 
-```text
-sass-windmill/
-    ├── _windmill.scss
-    ├── _windmill-utils.scss
-    └── _windmill-lib.scss
-```
+    or [download sass-windmill](https://github.com/RikuOta/sass-windmill) into your Sass project.  
+    The target is 3 files.
 
-## Usage
+    ```text
+    sass-windmill/
+        ├── _windmill.scss
+        ├── _windmill-utils.scss
+        └── _windmill-lib.scss
+    ```
 
 1. Import the partial in your Sass files and override default settings with your own preferences.
 
@@ -171,165 +143,85 @@ sass-windmill/
     $wm-min-breakpoint-addition: 1;
     ```
 
-1. Call (see below).
+1. Call (see usage below).
 
-### Selector
-
-Call with selector or take `$selector` argument.
-
-```scss
-// Call with selector.
-.your-selector {
-    @include windmill() { }
-}
-
-// Take $selector argument.
-@include windmill(
-    $selector: '.your-selector'
-) { }
-```
+## Usage
 
 ### Breakpoints
 
-- Set `$wm-breakpoints` global variable or take `$breakpoints` argument.
-- Breakpoints is a map of (breakpoint-name: minimum screen width), order from small to large.  
+- Pass breakpoints to `$wm-breakpoints` global variable or `$breakpoints` argument.
+- Breakpoints is a map of (breakpoint-name: minimum screen width), order from small to large.
 - The breakpoint-name replace the "SCR" string in selector.  
 (You can change "SCR" string by `$wm-breakpoint-placeholder` global variable).
-- If breakpoint < 1, output styles to outside @media block.
+- If breakpoint < 1, `windmill()` outputs styles to outside media block.
 
- ```scss
+```scss
 $wm-breakpoints: (
-    all: 0px,
+    all: 0,
     sm: 576px,
-    md: 768px,
-    lg: 992px,
-    xl: 1200px
+    md: 768px
 );
 
-.SCR-your-selector {
-    @include windmill() { }
+.SCR-foo {
+    @include windmill() {
+        display: block;
+    }
 }
 ```
 
 Compiles to:
 
  ```css
-.your-selector { }
+.foo {
+  display: block;
+}
 
 @media (min-width: 576px) {
-  .sm-your-selector { }
+  .sm-foo {
+    display: block;
+  }
 }
 
 @media (min-width: 768px) {
-  .md-your-selector { }
-}
-
-@media (min-width: 992px) {
-  .lg-your-selector { }
-}
-
-@media (min-width: 1200px) {
-  .xl-your-selector { }
+  .md-foo {
+    display: block;
+  }
 }
 ```
 
-- `windmill()` uses the mobile first breakpoint system.  
-If you make responsive design, use smaller breakpoint as base and overwrite it with larger breakpoint.
+Note: `windmill()` uses the mobile first breakpoint system. If you make responsive design, use smaller breakpoint as base and overwrite it with larger breakpoint.
 
 ```html
 <!-- .your-selector takes effect on all screens. -->
+<!-- .sm-your-selector takes effect on more than small screens. -->
 <!-- .md-your-selector takes effect on more than medium screens. -->
-<!-- .xl-your-selector takes effect on more than extra large screens. -->
-<div class="your-selector md-your-selector xl-your-selector"></div>
+<div class="your-selector sm-your-selector md-your-selector"></div>
 ```
 
 ### Generate styles
 
-Define declarations with @content block or `$declarations` argument.
-
- ```scss
-$wm-breakpoints: (
-    all: 0,
-    sm: 576px,
-    md: 768px,
-    lg: 992px,
-    xl: 1200px
-);
-
-// Use @content block.
-.SCR-your-selector {
-    @include windmill() {
-        font-size: 1rem;
-    }
-}
-
-// Take $declarations argument.
-.SCR-your-selector {
-    @include windmill(
-        $declarations: (font-size: 1rem)
-    );
-}
-```
-
-Compiles to:
-
-```css
-.your-selector {
-  font-size: 1rem;
-}
-
-@media (min-width: 576px) {
-  .sm-your-selector {
-    font-size: 1rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .md-your-selector {
-    font-size: 1rem;
-  }
-}
-
-@media (min-width: 992px) {
-  .lg-your-selector {
-    font-size: 1rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .xl-your-selector {
-    font-size: 1rem;
-  }
-}
-```
-
-### Generate styles (with value-variable)
-
-- `$declarations` argument accepts value-variable of `$variable$`.  
-If use it, have to take `$values` argument together.
-- `$values` argument expects a map of (value-variable: (value-name: value)).
+- `$declarations` argument is a map of (property: value), value accepts value-variable of `$variable$`.
+- `$values` argument is a map of (value-variable: (value-name: value)). If use value-variable in `$declarations` argument, have to specify together.
 - The value-name replace the "VAL" string in selector.  
 (You can change "VAL" string by `$wm-value-placeholder` global variable).
 
 ```scss
 $wm-breakpoints: (
-    all: 0px,
+    all: 0,
     sm: 576px,
-    md: 768px,
-    lg: 992px,
-    xl: 1200px
+    md: 768px
 );
 
-.SCR-your-selector-VAL {
+.SCR-foo-VAL {
     @include windmill(
         $declarations: (
             margin-bottom: '$any-string$'
         ),
         $values: (
             '$any-string$': (
-                1: 0.25rem,
-                2: 0.5rem,
-                3: 0.75rem
+                1: 1rem,
+                2: 2rem,
+                3: 3rem
             )
         )
     );
@@ -339,96 +231,65 @@ $wm-breakpoints: (
 Compiles to:
 
 ```css
-.your-selector-1 {
-  margin-bottom: 0.25rem;
+.foo-1 {
+  margin-bottom: 1rem;
 }
-.your-selector-2 {
-  margin-bottom: 0.5rem;
+.foo-2 {
+  margin-bottom: 2rem;
 }
-.your-selector-3 {
-  margin-bottom: 0.75rem;
+.foo-3 {
+  margin-bottom: 3rem;
 }
 
 @media (min-width: 576px) {
-  .sm-your-selector-1 {
-    margin-bottom: 0.25rem;
+  .sm-foo-1 {
+    margin-bottom: 1rem;
   }
-  .sm-your-selector-2 {
-    margin-bottom: 0.5rem;
+  .sm-foo-2 {
+    margin-bottom: 2rem;
   }
-  .sm-your-selector-3 {
-    margin-bottom: 0.75rem;
+  .sm-foo-3 {
+    margin-bottom: 3rem;
   }
 }
 
 @media (min-width: 768px) {
-  .md-your-selector-1 {
-    margin-bottom: 0.25rem;
+  .md-foo-1 {
+    margin-bottom: 1rem;
   }
-  .md-your-selector-2 {
-    margin-bottom: 0.5rem;
+  .md-foo-2 {
+    margin-bottom: 2rem;
   }
-  .md-your-selector-3 {
-    margin-bottom: 0.75rem;
-  }
-}
-
-@media (min-width: 992px) {
-  .lg-your-selector-1 {
-    margin-bottom: 0.25rem;
-  }
-  .lg-your-selector-2 {
-    margin-bottom: 0.5rem;
-  }
-  .lg-your-selector-3 {
-    margin-bottom: 0.75rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .xl-your-selector-1 {
-    margin-bottom: 0.25rem;
-  }
-  .xl-your-selector-2 {
-    margin-bottom: 0.5rem;
-  }
-  .xl-your-selector-3 {
-    margin-bottom: 0.75rem;
+  .md-foo-3 {
+    margin-bottom: 3rem;
   }
 }
 ```
 
-### Generate styles (mixed with value-variable)
-
-- If declarations that has value-variable and not has value-variable are mixed, `windmill()` output declarations that has not value-variable as grouping selector.
+Note: If value-variable and normal value mixed, `windmill()` outputs normal value as grouping selector.
 
 ```scss
 $wm-breakpoints: (
     all: 0,
     sm: 576px,
-    md: 768px,
-    lg: 992px,
-    xl: 1200px
+    md: 768px
 );
 
-$your-project-columns: (
-    4: 33.3%,
-    8: 66.6%,
-    12: 100%
-);
-
-.SCR-col-VAL {
+.SCR-foo-VAL {
     @include windmill(
         $declarations: (
-            flex: 0 0 '$width$',
-            max-width: '$width$'
+            margin-bottom: '$any-string$' // value-variable.
         ),
         $values: (
-            '$width$': $your-project-columns
+            '$any-string$': (
+                1: 1rem,
+                2: 2rem,
+                3: 3rem
+            )
         )
     ) {
-        word-wrap: break-word;
-        min-width: 0;
+        display: block; // Normal value.
+        text-align: center; // Normal value.
     }
 }
 ```
@@ -436,107 +297,60 @@ $your-project-columns: (
 Compiles to:
 
 ```css
-.col-4, .col-8, .col-12 { /* Group */
-  word-wrap: break-word;
-  min-width: 0;
+.foo-1, .foo-2, .foo-3 { // Grouping.
+  display: block;
+  text-align: center;
 }
-.col-4 {
-  flex: 0 0 33.3%;
-  max-width: 33.3%;
+.foo-1 {
+  margin-bottom: 1rem;
 }
-.col-8 {
-  flex: 0 0 66.6%;
-  max-width: 66.6%;
+.foo-2 {
+  margin-bottom: 2rem;
 }
-.col-12 {
-  flex: 0 0 100%;
-  max-width: 100%;
+.foo-3 {
+  margin-bottom: 3rem;
 }
 
 @media (min-width: 576px) {
-  .sm-col-4, .sm-col-8, .sm-col-12 { /* Group */
-    word-wrap: break-word;
-    min-width: 0;
+  .sm-foo-1, .sm-foo-2, .sm-foo-3 { // Grouping.
+    display: block;
+    text-align: center;
   }
-  .sm-col-4 {
-    flex: 0 0 33.3%;
-    max-width: 33.3%;
+  .sm-foo-1 {
+    margin-bottom: 1rem;
   }
-  .sm-col-8 {
-    flex: 0 0 66.6%;
-    max-width: 66.6%;
+  .sm-foo-2 {
+    margin-bottom: 2rem;
   }
-  .sm-col-12 {
-    flex: 0 0 100%;
-    max-width: 100%;
+  .sm-foo-3 {
+    margin-bottom: 3rem;
   }
 }
 
 @media (min-width: 768px) {
-  .md-col-4, .md-col-8, .md-col-12 { /* Group */
-    word-wrap: break-word;
-    min-width: 0;
+  .md-foo-1, .md-foo-2, .md-foo-3 { // Grouping.
+    display: block;
+    text-align: center;
   }
-  .md-col-4 {
-    flex: 0 0 33.3%;
-    max-width: 33.3%;
+  .md-foo-1 {
+    margin-bottom: 1rem;
   }
-  .md-col-8 {
-    flex: 0 0 66.6%;
-    max-width: 66.6%;
+  .md-foo-2 {
+    margin-bottom: 2rem;
   }
-  .md-col-12 {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
-}
-
-@media (min-width: 992px) {
-  .lg-col-4, .lg-col-8, .lg-col-12 { /* Group */
-    word-wrap: break-word;
-    min-width: 0;
-  }
-  .lg-col-4 {
-    flex: 0 0 33.3%;
-    max-width: 33.3%;
-  }
-  .lg-col-8 {
-    flex: 0 0 66.6%;
-    max-width: 66.6%;
-  }
-  .lg-col-12 {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
-}
-
-@media (min-width: 1200px) {
-  .xl-col-4, .xl-col-8, .xl-col-12 { /* Group */
-    word-wrap: break-word;
-    min-width: 0;
-  }
-  .xl-col-4 {
-    flex: 0 0 33.3%;
-    max-width: 33.3%;
-  }
-  .xl-col-8 {
-    flex: 0 0 66.6%;
-    max-width: 66.6%;
-  }
-  .xl-col-12 {
-    flex: 0 0 100%;
-    max-width: 100%;
+  .md-foo-3 {
+    margin-bottom: 3rem;
   }
 }
 ```
 
 ### Other arguments
 
-#### Remove
+#### $remove
 You can remove specific value-name in `$values` argument.
 
 ```scss
-.SCR-your-selector-VAL {
+.SCR-foo-VAL {
     @include windmill(
         $remove: (1, 3),
         $declarations: (
@@ -559,9 +373,21 @@ You can remove specific value-name in `$values` argument.
 }
 ```
 
-#### Disable
+#### $disable
 
 If `$disable` argument is true, output no styles.
+
+#### $selector
+
+Instead of calling with selector, you can pass selector to `$selector` argument.
+
+```scss
+@include windmill(
+    $selector: '.foo'
+) {
+    display: block;
+}
+```
 
 ## License
 

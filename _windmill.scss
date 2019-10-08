@@ -77,8 +77,10 @@ $wm-mixin-name: windmill;
 
     $breakpoints: $wm-breakpoints
 ) {
-    @if not $selector {
-        $selector: #{&};
+    @if $selector {
+        $selector: wm-stringify($selector);
+    } @else {
+        $selector: wm-stringify(&);
     }
     $declarations: wm-make-declarations-with-shorthand($declarations);
     $values: wm-make-values-with-shorthand($values);
@@ -88,8 +90,8 @@ $wm-mixin-name: windmill;
         // Remove specific value-name in $values.
         @if $remove and $values {
             @each $remove-value in $remove {
-                @if not _str-has(#{$remove-value}, '$') {
-                    $values: _map-deep-remove($values, $remove-value);
+                @if not wm-str-has(#{$remove-value}, '$') {
+                    $values: wm-map-deep-remove($values, $remove-value);
                 } @else {
                     @warn '$remove argument of #{$wm-mixin-name}() can\'t remove value-variable.';
                 }
