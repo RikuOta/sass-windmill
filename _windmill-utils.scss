@@ -33,7 +33,7 @@
     @return $sliced-list;
 }
 
-// wm-list-stringify((a, b, c), ' and ', '\"') =>  "a" and "b" and "c"
+// wm-list-stringify((foo, bar, baz), ' and ', '\"') =>  '"foo" and "bar" and "baz"'
 @function wm-list-stringify($list, $separator: '', $enclosure: '', $ignore-last-separator: true) {
     @if type-of($list) != list {
         @return $list;
@@ -71,6 +71,13 @@
 // ------------------------------
 // Strings
 // ------------------------------
+
+@function wm-stringify($value) {
+    @if $value == null {
+        @return 'null';
+    }
+    @return quote(unquote(#{$value}));
+}
 
 @function wm-str-has($string, $substring) {
     @return str-index($string, $substring) != null;

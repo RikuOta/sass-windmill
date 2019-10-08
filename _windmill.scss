@@ -77,14 +77,14 @@ $wm-mixin-name: windmill;
 
     $breakpoints: $wm-breakpoints
 ) {
-    @if not $selector {
-        $selector: #{&};
+    @if $selector {
+        $selector: wm-stringify($selector);
+    } @else {
+        $selector: wm-stringify(&);
     }
 
     $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
-
     @if $no-exception {
-
         // Remove specific value-name in $values.
         @if $remove and $values {
             @each $remove-value in $remove {
