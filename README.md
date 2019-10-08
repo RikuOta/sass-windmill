@@ -215,13 +215,19 @@ $wm-breakpoints: (
 .SCR-foo-VAL {
     @include windmill(
         $declarations: (
-            margin-bottom: '$any-string$'
+            margin: '$margin$',
+            padding: 0 '$padding$'
         ),
         $values: (
-            '$any-string$': (
+            '$margin$': (
                 1: 1rem,
                 2: 2rem,
                 3: 3rem
+            ),
+            '$padding$': (
+                1: 10px,
+                2: 20px,
+                3: 30px
             )
         )
     );
@@ -232,36 +238,45 @@ Compiles to:
 
 ```css
 .foo-1 {
-  margin-bottom: 1rem;
+  margin: 1rem;
+  padding: 0 10px;
 }
 .foo-2 {
-  margin-bottom: 2rem;
+  margin: 2rem;
+  padding: 0 20px;
 }
 .foo-3 {
-  margin-bottom: 3rem;
+  margin: 3rem;
+  padding: 0 30px;
 }
 
 @media (min-width: 576px) {
   .sm-foo-1 {
-    margin-bottom: 1rem;
+    margin: 1rem;
+    padding: 0 10px;
   }
   .sm-foo-2 {
-    margin-bottom: 2rem;
+    margin: 2rem;
+    padding: 0 20px;
   }
   .sm-foo-3 {
-    margin-bottom: 3rem;
+    margin: 3rem;
+    padding: 0 30px;
   }
 }
 
 @media (min-width: 768px) {
   .md-foo-1 {
-    margin-bottom: 1rem;
+    margin: 1rem;
+    padding: 0 10px;
   }
   .md-foo-2 {
-    margin-bottom: 2rem;
+    margin: 2rem;
+    padding: 0 20px;
   }
   .md-foo-3 {
-    margin-bottom: 3rem;
+    margin: 3rem;
+    padding: 0 30px;
   }
 }
 ```
@@ -278,10 +293,10 @@ $wm-breakpoints: (
 .SCR-foo-VAL {
     @include windmill(
         $declarations: (
-            margin-bottom: '$any-string$' // value-variable.
+            margin: '$margin$' // value-variable.
         ),
         $values: (
-            '$any-string$': (
+            '$margin$': (
                 1: 1rem,
                 2: 2rem,
                 3: 3rem
@@ -302,13 +317,13 @@ Compiles to:
   text-align: center;
 }
 .foo-1 {
-  margin-bottom: 1rem;
+  margin: 1rem;
 }
 .foo-2 {
-  margin-bottom: 2rem;
+  margin: 2rem;
 }
 .foo-3 {
-  margin-bottom: 3rem;
+  margin: 3rem;
 }
 
 @media (min-width: 576px) {
@@ -317,13 +332,13 @@ Compiles to:
     text-align: center;
   }
   .sm-foo-1 {
-    margin-bottom: 1rem;
+    margin: 1rem;
   }
   .sm-foo-2 {
-    margin-bottom: 2rem;
+    margin: 2rem;
   }
   .sm-foo-3 {
-    margin-bottom: 3rem;
+    margin: 3rem;
   }
 }
 
@@ -333,13 +348,13 @@ Compiles to:
     text-align: center;
   }
   .md-foo-1 {
-    margin-bottom: 1rem;
+    margin: 1rem;
   }
   .md-foo-2 {
-    margin-bottom: 2rem;
+    margin: 2rem;
   }
   .md-foo-3 {
-    margin-bottom: 3rem;
+    margin: 3rem;
   }
 }
 ```
@@ -354,16 +369,16 @@ You can remove specific value-name in `$values` argument.
     @include windmill(
         $remove: (1, 3),
         $declarations: (
-            width: '$width$',
-            height: '$height$'
+            margin: '$margin$',
+            padding: '$padding$'
         ),
         $values: (
-            '$width$': (
+            '$margin$': (
                 1: 1rem, // Remove.
                 2: 2rem,
                 3: 3rem  // Remove.
             ),
-            '$height$': (
+            '$padding$': (
                 1: 10px, // Remove.
                 2: 20px,
                 3: 30px  // Remove.
