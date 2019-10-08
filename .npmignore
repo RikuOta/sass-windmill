@@ -3,6 +3,6 @@
 node_modules
 .sass-cache
 *.css.map
-index.css
-index.scss
+test.css
+test.scss
 .travis.yml

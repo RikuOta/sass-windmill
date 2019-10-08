@@ -16,8 +16,8 @@
   ],
   "main": "_windmill.scss",
   "scripts": {
-    "build": "node-sass index.scss index.css --output-style expanded",
-    "start": "node-sass index.scss index.css --output-style expanded -w"
+    "test": "node-sass test.scss test.css --output-style expanded",
+    "start": "node-sass test.scss test.css --output-style expanded -w"
   },
   "bugs": {
     "url": "https://github.com/RikuOta/sass-windmill/issues"
