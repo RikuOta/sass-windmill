@@ -51,7 +51,7 @@
             $vars: append($vars, $var);
         }
     }
-    @return wm-list-unique(map-keys($values));
+    @return wm-list-unique($vars);
 }
 
 @function wm-get-value-names($values) {
