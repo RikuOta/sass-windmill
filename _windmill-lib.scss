@@ -151,7 +151,8 @@
     @each $var, $value in wm-get-var-and-value($values, $value-name) {
         @each $property, $dec-value in $declarations-pushed-value {
             @if wm-str-has(wm-stringify($dec-value), $var) {
-                $declarations-pushed-value: wm-map-set($declarations-pushed-value, $property, wm-str-replace(wm-str-remove(wm-stringify($dec-value), '\'', '\"'), $var, $value));
+                $new-value: wm-str-replace(wm-str-remove(wm-stringify($dec-value), '\'', '\"'), $var, $value);
+                $declarations-pushed-value: wm-map-set($declarations-pushed-value, $property, $new-value);
             }
         }
     }
