@@ -10,6 +10,7 @@ Provides a `windmill()` [Sass](https://sass-lang.com/) mixin, help to define uti
     - [$remove](#remove)
     - [$disable](#disable)
     - [$selector](#selector)
+  - [Shorthand](#shorthand)
 - [License](#license)
 
 Basic example:
@@ -365,6 +366,12 @@ Compiles to:
 You can remove specific value-name in `$values` argument.
 
 ```scss
+$wm-breakpoints: (
+    all: 0,
+    sm: 576px,
+    md: 768px
+);
+
 .SCR-foo-VAL {
     @include windmill(
         $remove: (1, 3),
@@ -401,6 +408,54 @@ Instead of calling with selector, you can pass selector to `$selector` argument.
     $selector: '.foo'
 ) {
     display: block;
+}
+```
+
+### Shorthand
+
+If there is only one value-variable, you can use shorthand.
+
+Before:
+
+```scss
+.SCR-foo-VAL {
+    @include windmill(
+        $declarations: (
+            margin: '$val$'
+        ),
+        $values: (
+            '$val$': (
+                1: 1rem,
+                2: 2rem,
+                3: 3rem
+            )
+        )
+    );
+}
+```
+
+After:
+
+```scss
+.SCR-foo-VAL {
+    @include windmill(
+        $declarations: margin,
+        $values: (
+            1: 1rem,
+            2: 2rem,
+            3: 3rem
+        )
+    );
+}
+
+// If omit the argument name.
+.SCR-foo-VAL {
+    @include windmill(margin, (1: 1rem, 2: 2rem, 3: 3rem));
+}
+
+// If add !important.
+.SCR-foo-VAL {
+    @include windmill((margin, true), (1: 1rem, 2: 2rem, 3: 3rem));
 }
 ```
 
