@@ -11,8 +11,8 @@ $wm-min-breakpoint-prefix: false;
 $wm-min-breakpoint-addition: 1;
 
 // Test preference.
-$valid-test-nums: 10, 11;
-$is-all-test-valid: true;
+$valid-test-nums: 0, 1;
+$is-all-test-valid: false;
 
 $current-test-num: 0 !default;
 @mixin test_windmill($args...) {
@@ -38,6 +38,22 @@ $test_values: (
     3: test,
     4: "test"
 );
+
+/* ------------------------------
+Omit the breakpoint-placeholder
+------------------------------ */
+.test {
+    @include test_windmill() {
+        display: block;
+    }
+}
+
+.test-VAL {
+    @include test_windmill(
+        $declarations: (margin: '$val$'),
+        $values: ('$val$': $test_values)
+    );
+}
 
 /* ------------------------------
 Take $selector without breakpoints
