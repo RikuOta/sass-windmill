@@ -86,6 +86,9 @@ $wm-mixin-name: windmill;
     }
 
     @if length(wm-validate-selector($selector, $wm-breakpoint-placeholder, false)) == length(wm-str-split($selector, ',')) {
+    @if $breakpoints == true {
+        $breakpoints: $wm-breakpoints;
+    }
         $breakpoints: false;
     }
 
