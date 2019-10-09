@@ -85,6 +85,10 @@ $wm-mixin-name: windmill;
     $declarations: wm-make-declarations-with-shorthand($declarations);
     $values: wm-make-values-with-shorthand($values);
 
+    @if length(wm-validate-selector($selector, $wm-breakpoint-placeholder, false)) == length(wm-str-split($selector, ',')) {
+        $breakpoints: false;
+    }
+
     $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
     @if $no-exception {
         // Remove specific value-name in $values.
