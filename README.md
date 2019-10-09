@@ -123,7 +123,7 @@ OR:
     // Temporary selector name to be replaced by value-name.
     $wm-value-placeholder: VAL;
 
-    // If use breakpoint-prefix on minimum screen width, set true.
+    // If use the breakpoint-prefix on minimum screen width, set true.
     //
     // Example:
     // Selector: .foo-SCR-bar
@@ -202,7 +202,7 @@ Note: `windmill()` uses the mobile first breakpoint system. If you make responsi
 ### Generate styles
 
 - `$declarations` argument is a map of (property: value), value accepts value-variable of `$variable$`.
-- `$values` argument is a map of (value-variable: (value-name: value)). If use value-variable in `$declarations` argument, have to specify together.
+- `$values` argument is a map of (value-variable: (value-name: value)).
 - The value-name replace the "VAL" string in selector.  
 (You can change "VAL" string by `$wm-value-placeholder` global variable).
 
@@ -216,8 +216,8 @@ $wm-breakpoints: (
 .SCR-foo-VAL {
     @include windmill(
         $declarations: (
-            margin: '$margin$',
-            padding: 0 '$padding$'
+            margin:  '$margin$',
+            padding: '$padding$' 0
         ),
         $values: (
             '$margin$': (
@@ -240,44 +240,44 @@ Compiles to:
 ```css
 .foo-1 {
   margin: 1rem;
-  padding: 0 10px;
+  padding: 10px 0;
 }
 .foo-2 {
   margin: 2rem;
-  padding: 0 20px;
+  padding: 20px 0;
 }
 .foo-3 {
   margin: 3rem;
-  padding: 0 30px;
+  padding: 30px 0;
 }
 
 @media (min-width: 576px) {
   .sm-foo-1 {
     margin: 1rem;
-    padding: 0 10px;
+    padding: 10px 0;
   }
   .sm-foo-2 {
     margin: 2rem;
-    padding: 0 20px;
+    padding: 20px 0;
   }
   .sm-foo-3 {
     margin: 3rem;
-    padding: 0 30px;
+    padding: 30px 0;
   }
 }
 
 @media (min-width: 768px) {
   .md-foo-1 {
     margin: 1rem;
-    padding: 0 10px;
+    padding: 10px 0;
   }
   .md-foo-2 {
     margin: 2rem;
-    padding: 0 20px;
+    padding: 20px 0;
   }
   .md-foo-3 {
     margin: 3rem;
-    padding: 0 30px;
+    padding: 30px 0;
   }
 }
 ```
@@ -376,7 +376,7 @@ $wm-breakpoints: (
     @include windmill(
         $remove: (1, 3),
         $declarations: (
-            margin: '$margin$',
+            margin:  '$margin$',
             padding: '$padding$'
         ),
         $values: (

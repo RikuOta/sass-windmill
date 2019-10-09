@@ -24,7 +24,7 @@ $wm-breakpoint-placeholder: SCR !default;
 // Temporary selector name to be replaced by value-name.
 $wm-value-placeholder: VAL !default;
 
-// If use breakpoint-prefix on minimum screen width, set true.
+// If use the breakpoint-prefix on minimum screen width, set true.
 //
 // Example:
 // Selector: .foo-SCR-bar
@@ -71,7 +71,7 @@ $wm-mixin-name: windmill;
     // If take $breakpoints, have to contain $wm-breakpoint-placeholder.
     // Example: .SCR-size
     //
-    // If take $value, have to contain $wm-value-placeholder.
+    // If take $values, have to contain $wm-value-placeholder.
     // Example: .size-VAL
     $selector: null,
 
