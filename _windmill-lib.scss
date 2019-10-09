@@ -88,6 +88,11 @@
     @return $values;
 }
 
+// wm-get-selector-length('.foo, .bar, .baz'); => 3
+@function wm-get-selector-length($selector_str) {
+    @return length(wm-str-split($selector_str, ','));
+}
+
 // Replace $replacement in $selector by $list,
 // return a string of grouping selector.
 //
