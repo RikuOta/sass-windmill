@@ -65,25 +65,25 @@ $wm-mixin-name: windmill;
     // You can remove specific value-name in $values.
     $remove: null,
 
-    // If true, output no styles.
-    $disable: false,
-
     // If take $breakpoints, have to contain $wm-breakpoint-placeholder.
     // Example: .SCR-size
     //
     // If take $values, have to contain $wm-value-placeholder.
     // Example: .size-VAL
     $selector: null,
+    $breakpoints: $wm-breakpoints,
 
-    $breakpoints: $wm-breakpoints
+     // If true, output no styles.
+    $disable: false
 ) {
+    $declarations: wm-make-declarations-with-shorthand($declarations);
+    $values: wm-make-values-with-shorthand($values);
+
     @if $selector {
         $selector: wm-stringify($selector);
     } @else {
         $selector: wm-stringify(&);
     }
-    $declarations: wm-make-declarations-with-shorthand($declarations);
-    $values: wm-make-values-with-shorthand($values);
 
     @if length(wm-validate-selector($selector, $wm-breakpoint-placeholder, false)) == length(wm-str-split($selector, ',')) {
         $breakpoints: false;
