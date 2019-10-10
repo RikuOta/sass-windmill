@@ -93,6 +93,34 @@
     @return length(wm-str-split($selector_str, ','));
 }
 
+// Return selector list that contains $substr.
+@function wm-get-selector-list-with-substr($selector_str, $substr) {
+    $selector-list-with-substr: ();
+
+    // Iterate for grouping selector like ".foo, .bar, .baz { }".
+    @each $one-selector in wm-str-split($selector_str, ',') {
+        $one-selector: wm-str-remove($one-selector, ' ');
+        @if wm-str-has($one-selector, $substr) {
+            $selector-list-with-substr: append($selector-list-with-substr, $one-selector);
+        }
+    }
+    @return $selector-list-with-substr;
+}
+
+// Return selector list that contains no $substr.
+@function wm-get-selector-list-without-substr($selector_str, $substr) {
+    $selector-list-without-substr: ();
+
+    // Iterate for grouping selector like ".foo, .bar, .baz { }".
+    @each $one-selector in wm-str-split($selector_str, ',') {
+        $one-selector: wm-str-remove($one-selector, ' ');
+        @if not wm-str-has($one-selector, $substr) {
+            $selector-list-without-substr: append($selector-list-without-substr, $one-selector);
+        }
+    }
+    @return $selector-list-without-substr;
+}
+
 // Replace $replacement in $selector by $list,
 // return a string of grouping selector.
 //
@@ -215,34 +243,6 @@
     }
 }
 
-// Return selector list that contains $substr.
-@function wm-get-selector-list-with-substr($selector_str, $substr) {
-    $selector-list-with-substr: ();
-
-    // Iterate for grouping selector like ".foo, .bar, .baz { }".
-    @each $one-selector in wm-str-split($selector_str, ',') {
-        $one-selector: wm-str-remove($one-selector, ' ');
-        @if wm-str-has($one-selector, $substr) {
-            $selector-list-with-substr: append($selector-list-with-substr, $one-selector);
-        }
-    }
-    @return $selector-list-with-substr;
-}
-
-// Return selector list that contains no $substr.
-@function wm-get-selector-list-without-substr($selector_str, $substr) {
-    $selector-list-without-substr: ();
-
-    // Iterate for grouping selector like ".foo, .bar, .baz { }".
-    @each $one-selector in wm-str-split($selector_str, ',') {
-        $one-selector: wm-str-remove($one-selector, ' ');
-        @if not wm-str-has($one-selector, $substr) {
-            $selector-list-without-substr: append($selector-list-without-substr, $one-selector);
-        }
-    }
-    @return $selector-list-without-substr;
-}
-
 // If there is exception, warn it and return false.
 @function wm-handle-exception($selector_str, $breakpoints, $declarations, $values, $disable) {
     @if $disable {
@@ -291,6 +291,20 @@
     @return true;
 }
 
+// Output only styles that contain value-variable in declaration.
+@mixin output-styles-with-var($selector_str, $breakpoints, $breakpoint-name, $declarations, $values, $value-name) {
+    @if $breakpoints {
+        $selector_str: wm-str-replace($selector_str, $wm-breakpoint-placeholder, $breakpoint-name);
+    }
+    @if $breakpoints and $breakpoint-name {
+        $selector_str: wm-remove-min-breakpoint-from-selector($selector_str, $breakpoints, $breakpoint-name);
+    }
+    $selector_str: wm-str-replace($selector_str, $wm-value-placeholder, $value-name);
+    @at-root #{$selector_str} {
+        @include wm-output-declarations(wm-push-value-to-declarations(wm-get-declarations-with-var($declarations), $values, $value-name));
+    }
+}
+
 // Output only styles that contain no value-variable in declaration.
 @mixin output-styles-without-var($selector_str, $breakpoints, $breakpoint-name, $declarations, $values) {
     @if $values {
@@ -306,19 +320,5 @@
     @at-root #{$selector_str} {
         @include wm-output-declarations(wm-get-declarations-without-var($declarations));
         @content;
-    }
-}
-
-// Output only styles that contain value-variable in declaration.
-@mixin output-styles-with-var($selector_str, $breakpoints, $breakpoint-name, $declarations, $values, $value-name) {
-    @if $breakpoints {
-        $selector_str: wm-str-replace($selector_str, $wm-breakpoint-placeholder, $breakpoint-name);
-    }
-    @if $breakpoints and $breakpoint-name {
-        $selector_str: wm-remove-min-breakpoint-from-selector($selector_str, $breakpoints, $breakpoint-name);
-    }
-    $selector_str: wm-str-replace($selector_str, $wm-value-placeholder, $value-name);
-    @at-root #{$selector_str} {
-        @include wm-output-declarations(wm-push-value-to-declarations(wm-get-declarations-with-var($declarations), $values, $value-name));
     }
 }
