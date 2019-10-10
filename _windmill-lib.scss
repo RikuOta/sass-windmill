@@ -4,7 +4,7 @@
 // => (height: "$size$")
 @function wm-get-declarations-with-var($declarations) {
     @each $property, $value in $declarations {
-        @if not wm-str-has(wm-stringify($value), '$') {
+        @if not wm-str-has(wm-to-string($value), '$') {
             $declarations: map-remove($declarations, $property);
         }
     }
@@ -17,7 +17,7 @@
 // => (width: 1rem)
 @function wm-get-declarations-without-var($declarations) {
     @each $property, $value in $declarations {
-        @if wm-str-has(wm-stringify($value), '$') {
+        @if wm-str-has(wm-to-string($value), '$') {
             $declarations: map-remove($declarations, $property);
         }
     }
@@ -47,7 +47,7 @@
 @function wm-get-value-vars($values) {
     $vars: ();
     @each $var in map-keys($values) {
-        @if wm-str-has(wm-stringify($var), '$') {
+        @if wm-str-has(wm-to-string($var), '$') {
             $vars: append($vars, $var);
         }
     }
@@ -57,7 +57,7 @@
 @function wm-get-value-names($values) {
     $value-names: ();
     @each $key in wm-map-deep-keys($values) {
-        @if not wm-str-has(wm-stringify($key), '$') {
+        @if not wm-str-has(wm-to-string($key), '$') {
             $value-names: append($value-names, $key);
         }
     }
@@ -88,8 +88,8 @@
     @return $values;
 }
 
-// wm-get-selector-length('.foo, .bar, .baz'); => 3
-@function wm-get-selector-length($selector_str) {
+// wm-get-selector-group-number('.foo, .bar, .baz'); => 3
+@function wm-get-selector-group-number($selector_str) {
     @return length(wm-str-split($selector_str, ','));
 }
 
@@ -103,7 +103,7 @@
     @each $value in $list {
         $grouping-selector: append($grouping-selector, wm-str-replace($selector_str, $replacement_str, $value), 'comma');
     }
-    @return wm-stringify($grouping-selector);
+    @return wm-to-string($grouping-selector);
 }
 
 @function wm-get-min-breakpoint-name($breakpoints) {
@@ -126,7 +126,7 @@
 
     $replacement-str: '';
     $removed-addition-str: wm-str-slice-based-on-substr(
-            $selector_str, wm-stringify($breakpoint-name), 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
+            $selector_str, wm-to-string($breakpoint-name), 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
     );
     @if $wm-min-breakpoint-addition > 0 {
         $replacement-str: $breakpoint-name + $removed-addition-str;
@@ -155,8 +155,8 @@
     $declarations-pushed-value: $declarations;
     @each $var, $value in wm-get-var-and-value($values, $value-name) {
         @each $property, $dec-value in $declarations-pushed-value {
-            @if wm-str-has(wm-stringify($dec-value), $var) {
-                $new-value: wm-stringify($dec-value);
+            @if wm-str-has(wm-to-string($dec-value), $var) {
+                $new-value: wm-to-string($dec-value);
                 $new-value: wm-str-remove($new-value, '\'', '\"'); // Remove quote of '$variable$'.
                 $new-value: wm-str-replace($new-value, $var, $value);
                 $declarations-pushed-value: wm-map-set($declarations-pushed-value, $property, #{$new-value});
@@ -208,10 +208,10 @@
     }
 
     @if length($missing-declarations-vars) > 0 {
-        @warn '$declarations argument of #{$wm-mixin-name}() is missing variable #{wm-list-stringify(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
+        @warn '$declarations argument of #{$wm-mixin-name}() is missing variable #{wm-list-to-string(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
     }
     @if length($missing-values-vars) > 0 {
-        @warn '$values argument of #{$wm-mixin-name}() is missing variable #{wm-list-stringify(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
+        @warn '$values argument of #{$wm-mixin-name}() is missing variable #{wm-list-to-string(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
     }
 }
 

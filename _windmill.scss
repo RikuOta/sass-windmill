@@ -80,9 +80,9 @@ $wm-mixin-name: windmill;
     $values: wm-make-values-with-shorthand($values);
 
     @if $selector {
-        $selector: wm-stringify($selector);
+        $selector: wm-to-string($selector);
     } @else {
-        $selector: wm-stringify(&);
+        $selector: wm-to-string(&);
     }
 
     @if $breakpoints == true {
@@ -90,7 +90,7 @@ $wm-mixin-name: windmill;
     }
     // If contain no $wm-breakpoint-placeholder in $selector,
     // set false to $breakpoints.
-    @if length(wm-validate-selector($selector, $wm-breakpoint-placeholder, false)) == wm-get-selector-length($selector) {
+    @if length(wm-validate-selector($selector, $wm-breakpoint-placeholder, false)) == wm-get-selector-group-number($selector) {
         $breakpoints: false;
     }
 
