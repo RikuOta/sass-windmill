@@ -1,6 +1,6 @@
 # Sass Windmill [![Build Status](https://travis-ci.org/RikuOta/sass-windmill.svg?branch=master)](https://travis-ci.org/RikuOta/sass-windmill)
 
-Provides a `windmill()` [Sass](https://sass-lang.com/) mixin, help to define utility classes like `.mb-10px` flexibly and simply.
+A [Sass](https://sass-lang.com/) mixin that helps to define utility class like `.mb-10px` flexibly and simply.
 
 - [How to get started](#how-to-get-started)
 - [Usage](#usage)
@@ -151,9 +151,9 @@ OR:
 ### Breakpoints
 
 - Pass breakpoints to `$wm-breakpoints` global variable or `$breakpoints` argument.
-- Breakpoints is a map of (breakpoint-name: minimum screen width), order from small to large.
-- The breakpoint-name replace the "SCR" string in selector.  
-(You can change "SCR" string by `$wm-breakpoint-placeholder` global variable).
+- The breakpoints is a map of (breakpoint-name: minimum screen width), order from small to large.
+- The breakpoint-name replaces the "SCR" string in selector.  
+(You can change the "SCR" string by `$wm-breakpoint-placeholder` global variable).
 - If breakpoint < 1, `windmill()` outputs styles to outside media block.
 
 ```scss
@@ -201,10 +201,10 @@ Note: `windmill()` uses the mobile first breakpoint system. If you make responsi
 
 ### Generate styles
 
-- `$declarations` argument is a map of (property: value), value accepts value-variable of `$variable$`.
+- `$declarations` argument is a map of (property: value), and value accepts value-variable of `$variable$`.
 - `$values` argument is a map of (value-variable: (value-name: value)).
-- The value-name replace the "VAL" string in selector.  
-(You can change "VAL" string by `$wm-value-placeholder` global variable).
+- The value-name replaces the "VAL" string in selector.  
+(You can change the "VAL" string by `$wm-value-placeholder` global variable).
 
 ```scss
 $wm-breakpoints: (
@@ -397,11 +397,11 @@ $wm-breakpoints: (
 
 #### $disable
 
-If `$disable` argument is true, output no styles.
+If `$disable` argument is true, outputs no styles.
 
 #### $selector
 
-Instead of calling with selector, you can pass selector to `$selector` argument.
+Instead of calling with a selector, you can pass a selector to `$selector` argument.
 
 ```scss
 @include windmill(
@@ -421,10 +421,10 @@ Before:
 .SCR-foo-VAL {
     @include windmill(
         $declarations: (
-            margin: '$val$'
+            margin: '$margin$'
         ),
         $values: (
-            '$val$': (
+            '$margin$': (
                 1: 1rem,
                 2: 2rem,
                 3: 3rem
