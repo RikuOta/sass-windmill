@@ -1,7 +1,7 @@
 {
   "name": "sass-windmill",
   "description": "A Sass mixin that helps to define utility class like .mb-10px flexibly and simply.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "keywords": [
     "helper",
     "media",
