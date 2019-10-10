@@ -215,19 +215,32 @@
     }
 }
 
-// If $contain is true, return list of selector that contains $substr.
-// If $contain is false, return list of selector that contains no $substr.
-@function wm-validate-selector($selector_str, $substr, $contain) {
-    $selectors-with-error: ();
+// Return selector list that contains $substr.
+@function wm-get-selector-list-with-substr($selector_str, $substr) {
+    $selector-list-with-substr: ();
 
     // Iterate for grouping selector like ".foo, .bar, .baz { }".
     @each $one-selector in wm-str-split($selector_str, ',') {
         $one-selector: wm-str-remove($one-selector, ' ');
-        @if wm-str-has($one-selector, $substr) == $contain {
-            $selectors-with-error: append($selectors-with-error, $one-selector);
+        @if wm-str-has($one-selector, $substr) {
+            $selector-list-with-substr: append($selector-list-with-substr, $one-selector);
         }
     }
-    @return $selectors-with-error;
+    @return $selector-list-with-substr;
+}
+
+// Return selector list that contains no $substr.
+@function wm-get-selector-list-without-substr($selector_str, $substr) {
+    $selector-list-without-substr: ();
+
+    // Iterate for grouping selector like ".foo, .bar, .baz { }".
+    @each $one-selector in wm-str-split($selector_str, ',') {
+        $one-selector: wm-str-remove($one-selector, ' ');
+        @if not wm-str-has($one-selector, $substr) {
+            $selector-list-without-substr: append($selector-list-without-substr, $one-selector);
+        }
+    }
+    @return $selector-list-without-substr;
 }
 
 // If there is exception, warn it and return false.
@@ -243,27 +256,27 @@
     }
 
     // If contain no $wm-breakpoint-placeholder in selector.
-    @if $breakpoints and (length(wm-validate-selector($selector_str, $wm-breakpoint-placeholder, false)) > 0) {
+    @if $breakpoints and (length(wm-get-selector-list-without-substr($selector_str, $wm-breakpoint-placeholder)) > 0) {
         $eg: '.#{$wm-breakpoint-placeholder}-your-selector';
         @warn '#{$wm-mixin-name}() needs "#{$wm-breakpoint-placeholder}" string in selector. e.g., "#{$eg}".';
         @return false;
     }
 
     // If contain no $wm-value-placeholder in selector.
-    @if $values and (length(wm-validate-selector($selector_str, $wm-value-placeholder, false)) > 0) {
+    @if $values and (length(wm-get-selector-list-without-substr($selector_str, $wm-value-placeholder)) > 0) {
         $eg: '.your-selector-#{$wm-value-placeholder}';
         @warn '#{$wm-mixin-name}() needs "#{$wm-value-placeholder}" string in selector. e.g., "#{$eg}".';
         @return false;
     }
 
     // If contain $wm-breakpoint-placeholder in selector.
-    @if (not $breakpoints) and (length(wm-validate-selector($selector_str, $wm-breakpoint-placeholder, true)) > 0) {
+    @if (not $breakpoints) and (length(wm-get-selector-list-with-substr($selector_str, $wm-breakpoint-placeholder)) > 0) {
         @warn 'Selector "#{$selector_str}" contains "#{$wm-breakpoint-placeholder}" string.';
         @return false;
     }
 
     // If contain $wm-value-placeholder in selector.
-    @if (not $values) and (length(wm-validate-selector($selector_str, $wm-value-placeholder, true)) > 0) {
+    @if (not $values) and (length(wm-get-selector-list-with-substr($selector_str, $wm-value-placeholder)) > 0) {
         @warn 'Selector "#{$selector_str}" contains "#{$wm-value-placeholder}" string.';
         @return false;
     }
