@@ -4,7 +4,7 @@
 // => (height: "$size$")
 @function wm-get-declarations-with-var($declarations) {
     @each $property, $value in $declarations {
-        @if not wm-str-has(wm-stringify($value), '$') {
+        @if not wm-str-has(wm-to-string($value), '$') {
             $declarations: map-remove($declarations, $property);
         }
     }
@@ -17,7 +17,7 @@
 // => (width: 1rem)
 @function wm-get-declarations-without-var($declarations) {
     @each $property, $value in $declarations {
-        @if wm-str-has(wm-stringify($value), '$') {
+        @if wm-str-has(wm-to-string($value), '$') {
             $declarations: map-remove($declarations, $property);
         }
     }
@@ -47,7 +47,7 @@
 @function wm-get-value-vars($values) {
     $vars: ();
     @each $var in map-keys($values) {
-        @if wm-str-has(wm-stringify($var), '$') {
+        @if wm-str-has(wm-to-string($var), '$') {
             $vars: append($vars, $var);
         }
     }
@@ -57,7 +57,7 @@
 @function wm-get-value-names($values) {
     $value-names: ();
     @each $key in wm-map-deep-keys($values) {
-        @if not wm-str-has(wm-stringify($key), '$') {
+        @if not wm-str-has(wm-to-string($key), '$') {
             $value-names: append($value-names, $key);
         }
     }
@@ -88,6 +88,39 @@
     @return $values;
 }
 
+// wm-get-selector-group-number('.foo, .bar, .baz'); => 3
+@function wm-get-selector-group-number($selector_str) {
+    @return length(wm-str-split($selector_str, ','));
+}
+
+// Return selector list that contains $substr.
+@function wm-get-selector-list-with-substr($selector_str, $substr) {
+    $selector-list-with-substr: ();
+
+    // Iterate for grouping selector like ".foo, .bar, .baz { }".
+    @each $one-selector in wm-str-split($selector_str, ',') {
+        $one-selector: wm-str-remove($one-selector, ' ');
+        @if wm-str-has($one-selector, $substr) {
+            $selector-list-with-substr: append($selector-list-with-substr, $one-selector);
+        }
+    }
+    @return $selector-list-with-substr;
+}
+
+// Return selector list that contains no $substr.
+@function wm-get-selector-list-without-substr($selector_str, $substr) {
+    $selector-list-without-substr: ();
+
+    // Iterate for grouping selector like ".foo, .bar, .baz { }".
+    @each $one-selector in wm-str-split($selector_str, ',') {
+        $one-selector: wm-str-remove($one-selector, ' ');
+        @if not wm-str-has($one-selector, $substr) {
+            $selector-list-without-substr: append($selector-list-without-substr, $one-selector);
+        }
+    }
+    @return $selector-list-without-substr;
+}
+
 // Replace $replacement in $selector by $list,
 // return a string of grouping selector.
 //
@@ -98,7 +131,7 @@
     @each $value in $list {
         $grouping-selector: append($grouping-selector, wm-str-replace($selector_str, $replacement_str, $value), 'comma');
     }
-    @return wm-stringify($grouping-selector);
+    @return wm-to-string($grouping-selector);
 }
 
 @function wm-get-min-breakpoint-name($breakpoints) {
@@ -121,7 +154,7 @@
 
     $replacement-str: '';
     $removed-addition-str: wm-str-slice-based-on-substr(
-            $selector_str, wm-stringify($breakpoint-name), 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
+            $selector_str, wm-to-string($breakpoint-name), 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
     );
     @if $wm-min-breakpoint-addition > 0 {
         $replacement-str: $breakpoint-name + $removed-addition-str;
@@ -150,8 +183,8 @@
     $declarations-pushed-value: $declarations;
     @each $var, $value in wm-get-var-and-value($values, $value-name) {
         @each $property, $dec-value in $declarations-pushed-value {
-            @if wm-str-has(wm-stringify($dec-value), $var) {
-                $new-value: wm-stringify($dec-value);
+            @if wm-str-has(wm-to-string($dec-value), $var) {
+                $new-value: wm-to-string($dec-value);
                 $new-value: wm-str-remove($new-value, '\'', '\"'); // Remove quote of '$variable$'.
                 $new-value: wm-str-replace($new-value, $var, $value);
                 $declarations-pushed-value: wm-map-set($declarations-pushed-value, $property, #{$new-value});
@@ -203,26 +236,11 @@
     }
 
     @if length($missing-declarations-vars) > 0 {
-        @warn '$declarations argument of #{$wm-mixin-name}() is missing variable #{wm-list-stringify(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
+        @warn '$declarations argument of #{$wm-mixin-name}() is missing variable #{wm-list-to-string(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
     }
     @if length($missing-values-vars) > 0 {
-        @warn '$values argument of #{$wm-mixin-name}() is missing variable #{wm-list-stringify(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
+        @warn '$values argument of #{$wm-mixin-name}() is missing variable #{wm-list-to-string(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
     }
-}
-
-// If $contain is true, return list of selector that contains $substr.
-// If $contain is false, return list of selector that contains no $substr.
-@function wm-validate-selector($selector_str, $substr, $contain) {
-    $selectors-with-error: ();
-
-    // Iterate for grouping selector like ".foo, .bar, .baz { }".
-    @each $one-selector in wm-str-split($selector_str, ',') {
-        $one-selector: wm-str-remove($one-selector, ' ');
-        @if wm-str-has($one-selector, $substr) == $contain {
-            $selectors-with-error: append($selectors-with-error, $one-selector);
-        }
-    }
-    @return $selectors-with-error;
 }
 
 // If there is exception, warn it and return false.
@@ -238,27 +256,27 @@
     }
 
     // If contain no $wm-breakpoint-placeholder in selector.
-    @if $breakpoints and (length(wm-validate-selector($selector_str, $wm-breakpoint-placeholder, false)) > 0) {
+    @if $breakpoints and (length(wm-get-selector-list-without-substr($selector_str, $wm-breakpoint-placeholder)) > 0) {
         $eg: '.#{$wm-breakpoint-placeholder}-your-selector';
         @warn '#{$wm-mixin-name}() needs "#{$wm-breakpoint-placeholder}" string in selector. e.g., "#{$eg}".';
         @return false;
     }
 
     // If contain no $wm-value-placeholder in selector.
-    @if $values and (length(wm-validate-selector($selector_str, $wm-value-placeholder, false)) > 0) {
+    @if $values and (length(wm-get-selector-list-without-substr($selector_str, $wm-value-placeholder)) > 0) {
         $eg: '.your-selector-#{$wm-value-placeholder}';
         @warn '#{$wm-mixin-name}() needs "#{$wm-value-placeholder}" string in selector. e.g., "#{$eg}".';
         @return false;
     }
 
     // If contain $wm-breakpoint-placeholder in selector.
-    @if (not $breakpoints) and (length(wm-validate-selector($selector_str, $wm-breakpoint-placeholder, true)) > 0) {
+    @if (not $breakpoints) and (length(wm-get-selector-list-with-substr($selector_str, $wm-breakpoint-placeholder)) > 0) {
         @warn 'Selector "#{$selector_str}" contains "#{$wm-breakpoint-placeholder}" string.';
         @return false;
     }
 
     // If contain $wm-value-placeholder in selector.
-    @if (not $values) and (length(wm-validate-selector($selector_str, $wm-value-placeholder, true)) > 0) {
+    @if (not $values) and (length(wm-get-selector-list-with-substr($selector_str, $wm-value-placeholder)) > 0) {
         @warn 'Selector "#{$selector_str}" contains "#{$wm-value-placeholder}" string.';
         @return false;
     }
@@ -271,6 +289,20 @@
     }
 
     @return true;
+}
+
+// Output only styles that contain value-variable in declaration.
+@mixin output-styles-with-var($selector_str, $breakpoints, $breakpoint-name, $declarations, $values, $value-name) {
+    @if $breakpoints {
+        $selector_str: wm-str-replace($selector_str, $wm-breakpoint-placeholder, $breakpoint-name);
+    }
+    @if $breakpoints and $breakpoint-name {
+        $selector_str: wm-remove-min-breakpoint-from-selector($selector_str, $breakpoints, $breakpoint-name);
+    }
+    $selector_str: wm-str-replace($selector_str, $wm-value-placeholder, $value-name);
+    @at-root #{$selector_str} {
+        @include wm-output-declarations(wm-push-value-to-declarations(wm-get-declarations-with-var($declarations), $values, $value-name));
+    }
 }
 
 // Output only styles that contain no value-variable in declaration.
@@ -288,19 +320,5 @@
     @at-root #{$selector_str} {
         @include wm-output-declarations(wm-get-declarations-without-var($declarations));
         @content;
-    }
-}
-
-// Output only styles that contain value-variable in declaration.
-@mixin output-styles-with-var($selector_str, $breakpoints, $breakpoint-name, $declarations, $values, $value-name) {
-    @if $breakpoints {
-        $selector_str: wm-str-replace($selector_str, $wm-breakpoint-placeholder, $breakpoint-name);
-    }
-    @if $breakpoints and $breakpoint-name {
-        $selector_str: wm-remove-min-breakpoint-from-selector($selector_str, $breakpoints, $breakpoint-name);
-    }
-    $selector_str: wm-str-replace($selector_str, $wm-value-placeholder, $value-name);
-    @at-root #{$selector_str} {
-        @include wm-output-declarations(wm-push-value-to-declarations(wm-get-declarations-with-var($declarations), $values, $value-name));
     }
 }
