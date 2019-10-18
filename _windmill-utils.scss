@@ -83,12 +83,17 @@
     @return str-index($string, $substring) != null;
 }
 
-@function wm-str-replace($string, $substring, $new-substring: '') {
+@function wm-str-replace($string, $substring, $new-substring: '', $is-once: false) {
     $index: str-index($string, $substring);
     @if $index {
         $before: str-slice($string, 1, $index - 1);
         $after: str-slice($string, ($index + str-length($substring)));
-        @return wm-str-replace(($before + $new-substring + $after), $substring, $new-substring);
+        $new-string: $before + $new-substring + $after;
+        @if not $is-once {
+            @return wm-str-replace($new-string, $substring, $new-substring);
+        } @else {
+            @return $new-string;
+        }
     } @else {
         @return $string;
     }
