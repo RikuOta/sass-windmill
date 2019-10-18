@@ -172,32 +172,28 @@
     @return str-slice($string, $begin-of-slice, $end-of-slice);
 }
 
-// wm-str-match('-0-1-2-3-', '-', '-'); => ("-0-", "-2-")
+// wm-str-match('foo [bar] baz [qux]', '[', ']'); => ("[bar]", "[qux]")
 @function wm-str-match($string, $begin-substring, $end-substring) {
     $string-list: ();
-    $condition: true;
+    @while true {
+        $begin-index: str-index($string, $begin-substring);
 
-    @while $condition {
-        $begin-of-slice: str-index($string, $begin-substring);
-
-        $end-of-slice: null;
-        @if $begin-of-slice {
-            $end-of-slice: str-index(str-slice($string, $begin-of-slice + 1), $end-substring);
+        $end-index: null;
+        @if $begin-index {
+            $end-index: str-index(str-slice($string, $begin-index + 1), $end-substring);
         }
-        @if $end-of-slice {
-            $end-of-slice: $begin-of-slice + $end-of-slice;
+        @if $end-index {
+            $end-index: $begin-index + $end-index;
         }
 
-        @if $begin-of-slice and $end-of-slice {
-            $matched-string: str-slice($string, $begin-of-slice, $end-of-slice);
+        @if $begin-index and $end-index and (abs($begin-index - $end-index) > 1) {
+            $matched-string: str-slice($string, $begin-index, $end-index);
             $string-list: append($string-list, $matched-string);
-            $string: str-slice($string, $begin-of-slice + $end-of-slice);
+            $string: str-slice($string, $end-index + 1);
         } @else {
-            $condition: false;
+            @return wm-list-unique($string-list);
         }
     }
-
-    @return wm-list-unique($string-list);
 }
 
 // ------------------------------
