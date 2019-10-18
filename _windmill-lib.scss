@@ -131,7 +131,7 @@
     @each $value in $list {
         $grouping-selector: append($grouping-selector, wm-str-replace($selector_str, $replacement_str, $value), 'comma');
     }
-    @return wm-to-string($grouping-selector);
+    @return wm-str-remove(wm-to-string($grouping-selector), '"');
 }
 
 @function wm-get-min-breakpoint-name($breakpoints) {

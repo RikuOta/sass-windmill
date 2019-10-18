@@ -76,6 +76,9 @@
     @if $value == null {
         @return 'null';
     }
+    @if type-of($value) == list {
+        @return quote(unquote(#{$value + ''}));
+    }
     @return quote(unquote(#{$value}));
 }
 
