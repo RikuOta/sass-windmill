@@ -82,8 +82,8 @@
 }
 
 @function wm-make-values-with-shorthand($values) {
-    @if $values and (length(wm-get-value-vars($values)) < 1) {
-        @return ('$val$': $values);
+    @if $values and (wm-map-depth($values) <= 1) {
+        @return ('val': $values);
     }
     @return $values;
 }

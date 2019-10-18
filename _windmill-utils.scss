@@ -318,3 +318,15 @@
 
     @return wm-list-unique($matched-string-list);
 }
+
+// wm-map-depth((foo: 100px)); => 1
+// wm-map-depth((foo: 100px, bar: (baz: 200px))); => 2
+@function wm-map-depth($map) {
+    $depth-num: 1;
+    @each $key, $value in $map {
+        @if type-of($value) == map {
+            $depth-num: max(wm-map-depth($value) + 1, $depth-num);
+        }
+    }
+    @return $depth-num;
+}
