@@ -49,6 +49,15 @@
     @return $result-string;
 }
 
+// wm-list-map((foo, bar, baz), to-upper-case); => (FOO, BAR, BAZ)
+@function wm-list-map($list, $callback, $args...) {
+    $new-list: ();
+    @each $value in $list {
+        $new-list: append($new-list, call(get-function($callback), $value, $args...));
+    }
+    @return $new-list;
+}
+
 // ------------------------------
 // Numbers
 // ------------------------------
