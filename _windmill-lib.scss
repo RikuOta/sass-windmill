@@ -256,7 +256,7 @@
 
 @mixin wm-output-declarations($declarations) {
     @each $property, $value in $declarations {
-        #{$property}: $value;
+        #{$property}: #{$value};
     }
 }
 
