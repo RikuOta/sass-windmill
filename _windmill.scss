@@ -94,6 +94,15 @@ $wm-mixin-name: windmill;
         $breakpoints: false;
     }
 
+    // Fallback for old specification.
+    // Will be removed in version 1.2.0.
+    @if $declarations {
+        $declarations: wm-apply-fallback-to-declarations($declarations);
+    }
+    @if $values {
+        $values: wm-apply-fallback-to-values($values);
+    }
+
     $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
     @if $no-exception {
         // Remove specific value-name in $values.

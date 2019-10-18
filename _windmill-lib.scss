@@ -1,3 +1,50 @@
+// ------------------------------
+// For fallback
+// ------------------------------
+
+// wm-change-doll-to-bracket('foo $var$'); => 'foo [bar]'
+@function wm-change-doll-to-bracket($string) {
+    $index: 1;
+    @while (true) {
+        $is-odd: $index % 2 != 0;
+
+        @if not wm-str-has($string, '$') {
+            @return $string;
+        }
+        @if $is-odd and length(wm-str-indexes($string, '$')) <= 1 {
+            @return $string;
+        }
+
+        @if $is-odd {
+            $string: wm-str-replace($string, '$', '[', true);
+        } @else {
+            $string: wm-str-replace($string, '$', ']', true);
+        }
+        $index: $index + 1;
+    }
+}
+
+// wm-apply-fallback-to-declarations();
+@function wm-apply-fallback-to-declarations($declarations) {
+    $new-declarations: ();
+    @each $property, $value in $declarations {
+        $new-declarations: wm-map-set($new-declarations, $property, wm-change-doll-to-bracket(wm-to-string($value)));
+    }
+    @return $new-declarations;
+}
+
+@function wm-apply-fallback-to-values($values) {
+    $new-values: ();
+    @each $var, $map in $values {
+        $new-values: wm-map-set($new-values, wm-str-remove($var, '$'), $map);
+    }
+    @return $new-values;
+}
+
+// ------------------------------
+// Main
+// ------------------------------
+
 // wm-get-vars('foo -bar-'); => ("-bar-")
 @function wm-get-vars($string) {
     $vars: ();
