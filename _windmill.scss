@@ -53,12 +53,12 @@ $wm-mixin-name: windmill;
 
 @mixin windmill(//
     // A map of (property: value),
-    // value can contains value-variable of "$variable$".
-    // Example: (width: 1rem, height: '$size$')
+    // value can contains variables of "[variable]".
+    // Example: (width: 1rem, height: [val])
     $declarations: null,
 
     // A map of (value-variable: (value-name: value)).
-    // Example: ('$size$': (1: 0.25rem, 2: 0.5rem, 3: 0.75rem))
+    // Example: (val: (1: 1rem, 2: 2rem, 3: 3rem))
     $values: null,
 
     // A list of (value-name, value-name, value-name, ...).
