@@ -35,6 +35,8 @@
     @return $new-declarations;
 }
 
+// wm-apply-fallback-to-values(('$val$': foo));
+// => (val: foo)
 @function wm-apply-fallback-to-values($values) {
     $new-values: ();
     @each $var, $map in $values {
@@ -47,6 +49,10 @@
 // Shorthand
 // ------------------------------
 
+// wm-make-declarations-with-shorthand(margin);
+// => (margin: "[val]")
+// wm-make-declarations-with-shorthand((margin, true));
+// => (margin: "[val] !important")
 @function wm-make-declarations-with-shorthand($declarations) {
     @if $declarations and (type-of($declarations) == string) {
         @return ($declarations: '[val]');
@@ -63,6 +69,8 @@
     @return $declarations;
 }
 
+// wm-make-values-with-shorthand((1: 1rem, 2: 2rem, 3: 3rem));
+// => (val: (1: 1rem, 2: 2rem, 3: 3rem))
 @function wm-make-values-with-shorthand($values) {
     @if $values and (wm-map-depth($values) <= 1) {
         @return (val: $values);
