@@ -133,6 +133,15 @@
 }
 
 // Return a map of (value-variable: value).
+// wm-remove-value-names((val: (1: 1rem, 2: 2rem, 3: 3rem)), 1); => (val: (2: 2rem, 3: 3rem))
+@function wm-remove-value-names($values, $removed-value-names...) {
+    $new-values: ();
+    @each $var, $map in $values {
+        $new-values: wm-map-set($new-values, $var, map-remove($map, $removed-value-names...));
+    }
+    @return $new-values;
+}
+
 //
 // Example:
 // $values: ('$width$': (1: 1rem, 2: 2rem, 3: 3rem))

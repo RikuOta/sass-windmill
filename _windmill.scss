@@ -106,14 +106,8 @@ $wm-mixin-name: windmill;
     $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
     @if $no-exception {
         // Remove specific value-name in $values.
-        @if $remove and $values {
-            @each $remove-value in $remove {
-                @if not wm-str-has(#{$remove-value}, '$') {
-                    $values: wm-map-deep-remove($values, $remove-value);
-                } @else {
-                    @warn '$remove argument of #{$wm-mixin-name}() can\'t remove value-variable.';
-                }
-            }
+        @if $values and $remove {
+            $values: wm-remove-value-names($values, $remove...);
         }
 
         // If not match variables number of $declarations and $values, warn.
