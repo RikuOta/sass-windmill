@@ -42,6 +42,33 @@
 }
 
 // ------------------------------
+// Shorthand
+// ------------------------------
+
+@function wm-make-declarations-with-shorthand($declarations) {
+    @if $declarations and (type-of($declarations) == string) {
+        @return ($declarations: '[val]');
+    }
+    @if $declarations and (type-of($declarations) == list) {
+        $property: nth($declarations, 1);
+        $is-important: nth($declarations, 2);
+        $important-frag: '';
+        @if $is-important {
+            $important-frag: ' !important';
+        }
+        @return ($property: '[val]' + $important-frag);
+    }
+    @return $declarations;
+}
+
+@function wm-make-values-with-shorthand($values) {
+    @if $values and (wm-map-depth($values) <= 1) {
+        @return ('val': $values);
+    }
+    @return $values;
+}
+
+// ------------------------------
 // Main
 // ------------------------------
 
@@ -86,22 +113,6 @@
     @return $declarations;
 }
 
-@function wm-make-declarations-with-shorthand($declarations) {
-    @if $declarations and (type-of($declarations) == string) {
-        @return ($declarations: '[val]');
-    }
-    @if $declarations and (type-of($declarations) == list) {
-        $property: nth($declarations, 1);
-        $is-important: nth($declarations, 2);
-        $important-frag: '';
-        @if $is-important {
-            $important-frag: ' !important';
-        }
-        @return ($property: '[val]' + $important-frag);
-    }
-    @return $declarations;
-}
-
 @function wm-get-value($values, $value-variable, $value-name) {
     @return wm-map-deep-get($values, $value-variable, $value-name);
 }
@@ -135,13 +146,6 @@
         }
     }
     @return $var-and-value;
-}
-
-@function wm-make-values-with-shorthand($values) {
-    @if $values and (wm-map-depth($values) <= 1) {
-        @return ('val': $values);
-    }
-    @return $values;
 }
 
 // wm-get-selector-group-number('.foo, .bar, .baz'); => 3
