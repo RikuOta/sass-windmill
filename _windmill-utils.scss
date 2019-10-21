@@ -342,3 +342,19 @@
     }
     @return $depth-num;
 }
+
+// wm-map-rest((foo: 100, bar: (baz: 200)), 1); => (foo: 100, bar: (baz: 200))
+// wm-map-rest((foo: 100, bar: (baz: 200)), 2); => (baz: 200)
+@function wm-map-rest($map, $begin) {
+    @if $begin <= 1 {
+        @return $map;
+    }
+
+    $new-map: ();
+    @each $key, $value in $map {
+        @if type-of($value) == map {
+            $new-map: map-merge($new-map, $value);
+        }
+    }
+    @return wm-map-rest($new-map, $begin - 1);
+}
