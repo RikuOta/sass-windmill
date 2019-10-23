@@ -44,12 +44,11 @@ $wm-min-breakpoint-prefix: false !default;
 // If -2: .fo-bar
 $wm-min-breakpoint-addition: 1 !default;
 
-// Mixin name that use to warn.
-$wm-mixin-name: windmill;
-
 // ------------------------------
 // Main mixin
 // ------------------------------
+
+$wm-mixin-name: 'windmill';
 
 @mixin windmill(//
     // A map of (property: value),
