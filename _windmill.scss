@@ -80,9 +80,9 @@ $wm-warning-title: '[Windmill warn]: ';
     $values: wm-make-values-with-shorthand($values);
 
     @if $selector {
-        $selector: wm-to-string($selector);
+        $selector: wm-list-to-text($selector, ', ');
     } @else {
-        $selector: wm-to-string(&);
+        $selector: wm-list-to-text(&, ', ');
     }
 
     @if $breakpoints == true {
