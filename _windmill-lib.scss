@@ -30,7 +30,9 @@
 @function wm-apply-fallback-to-declarations($declarations) {
     $new-declarations: ();
     @each $property, $value in $declarations {
-        $new-declarations: wm-map-set($new-declarations, $property, wm-change-doll-to-bracket(wm-to-string($value)));
+        $new-value: wm-to-string($value);
+        $new-value: wm-change-doll-to-bracket($new-value);
+        $new-declarations: wm-map-set($new-declarations, $property, $new-value);
     }
     @return $new-declarations;
 }
