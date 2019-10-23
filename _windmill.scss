@@ -49,6 +49,7 @@ $wm-min-breakpoint-addition: 1 !default;
 // ------------------------------
 
 $wm-mixin-name: 'windmill';
+$wm-warning-title: '[Windmill warn]: ';
 
 @mixin windmill(//
     // A map of (property: value),

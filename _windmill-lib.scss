@@ -308,10 +308,10 @@
     }
 
     @if length($missing-declarations-vars) > 0 {
-        @warn '$declarations argument of #{$wm-mixin-name}() is missing variable #{wm-list-to-string(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
+        @warn '#{$wm-warning-title}declarations argument is missing variable #{wm-list-to-string(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
     }
     @if length($missing-values-vars) > 0 {
-        @warn '$values argument of #{$wm-mixin-name}() is missing variable #{wm-list-to-string(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
+        @warn '#{$wm-warning-title}values argument is missing variable #{wm-list-to-string(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
     }
 }
 
@@ -323,40 +323,37 @@
 
     // If $selector is missing.
     @if (not $selector_str) or ($selector_str == '') {
-        @warn '#{$wm-mixin-name}() needs $selector argument, or call like \".your-selector { @include #{$wm-mixin-name}(...) { ... } }\".';
+        @warn '#{$wm-warning-title}Needs $selector argument, or call like ".your-selector { @include #{$wm-mixin-name}(...) { ... } }".';
         @return false;
     }
 
-        $eg: '.#{$wm-breakpoint-placeholder}-your-selector';
-        @warn '#{$wm-mixin-name}() needs "#{$wm-breakpoint-placeholder}" string in selector. e.g., "#{$eg}".';
     // If $selector contains no $wm-breakpoint-placeholder.
     @if $breakpoints and (length(wm-split-selector-without-substr($selector_str, $wm-breakpoint-placeholder)) > 0) {
+        @warn '#{$wm-warning-title}Needs the "#{$wm-breakpoint-placeholder}" string in selector. e.g., ".#{$wm-breakpoint-placeholder}-your-selector".';
         @return false;
     }
 
-        $eg: '.your-selector-#{$wm-value-placeholder}';
-        @warn '#{$wm-mixin-name}() needs "#{$wm-value-placeholder}" string in selector. e.g., "#{$eg}".';
     // If $selector contains no $wm-value-placeholder.
     @if $values and (length(wm-split-selector-without-substr($selector_str, $wm-value-placeholder)) > 0) {
+        @warn '#{$wm-warning-title}Needs the "#{$wm-value-placeholder}" string in selector. e.g., ".your-selector-#{$wm-value-placeholder}".';
         @return false;
     }
 
-        @warn 'Selector "#{$selector_str}" contains "#{$wm-breakpoint-placeholder}" string.';
     // If $selector contains $wm-breakpoint-placeholder.
     @if (not $breakpoints) and (length(wm-split-selector-with-substr($selector_str, $wm-breakpoint-placeholder)) > 0) {
+        @warn '#{$wm-warning-title}Selector "#{$selector_str}" contains the "#{$wm-breakpoint-placeholder}" string, but needless when the breakpoints is falsy.';
         @return false;
     }
 
-        @warn 'Selector "#{$selector_str}" contains "#{$wm-value-placeholder}" string.';
     // If $selector contains $wm-value-placeholder.
     @if (not $values) and (length(wm-split-selector-with-substr($selector_str, $wm-value-placeholder)) > 0) {
+        @warn '#{$wm-warning-title}Selector "#{$selector_str}" contains the "#{$wm-value-placeholder}" string, but needless when values argument is undefined.';
         @return false;
     }
 
     // If only receives $values.
     @if $values and (not $declarations) {
-        $eg: '@include #{$wm-mixin-name}($declarations: (property: \'#{nth(wm-get-value-vars($values), 1)}\')) { ... }';
-        @warn '#{$wm-mixin-name}() needs $declarations argument. e.g., "#{$eg}".';
+        @warn '#{$wm-warning-title}Needs declarations argument together if you set values argument.';
         @return false;
     }
 
