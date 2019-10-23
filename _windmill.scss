@@ -88,9 +88,9 @@ $wm-warning-title: '[Windmill warn]: ';
     @if $breakpoints == true {
         $breakpoints: $wm-breakpoints;
     }
-    @if length(wm-split-selector-without-substr($selector, $wm-breakpoint-placeholder)) == wm-get-selector-group-number($selector) {
     // If $selector contains no $wm-breakpoint-placeholder,
     // sets false to $breakpoints.
+    @if $selector and length(wm-split-selector-without-substr($selector, $wm-breakpoint-placeholder)) == wm-get-selector-group-number($selector) {
         $breakpoints: false;
     }
 
