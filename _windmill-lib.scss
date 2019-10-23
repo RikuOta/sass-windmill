@@ -146,10 +146,8 @@
 
 // Returns a map of (value-variable: value).
 //
-// Example:
-// $values: ('$width$': (1: 1rem, 2: 2rem, 3: 3rem))
-// $value-name: 1
-// => ($width$: 1rem)
+// wm-get-var-and-value((val: (1: 1rem, 2: 2rem, 3: 3rem)), 1);
+// => (val: 1rem)
 @function wm-get-var-and-value($values, $value-name) {
     $var-and-value: ();
     @each $var in wm-get-value-vars($values) {
@@ -197,8 +195,8 @@
 // Replaces $replacement_str in $selector_str by $list,
 // returns a string of grouping selector.
 //
-// wm-group-selector('.selector-VAL', 'VAL', (1, 2, 3));
-// => (".selector-1, .selector-2, .selector-3")
+// wm-group-selector('.selector-A', 'A', (1, 2, 3));
+// => ".selector-1, .selector-2, .selector-3"
 @function wm-group-selector($selector_str, $replacement_str, $list) {
     $grouping-selector: ();
     @each $value in $list {
