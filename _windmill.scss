@@ -121,7 +121,7 @@ $wm-warning-title: '[Windmill warn]: ';
             }
             @if $declarations and $values {
                 @each $value-name in wm-get-value-names($values) {
-                    @include output-styles-with-var($selector, false, false, $declarations, $values, $value-name);
+                    @include wm-output-declarations-with-var($selector, false, false, $declarations, $values, $value-name);
                 }
             }
         }
@@ -134,7 +134,7 @@ $wm-warning-title: '[Windmill warn]: ';
                     }
                     @if $declarations and $values {
                         @each $value-name in wm-get-value-names($values) {
-                            @include output-styles-with-var($selector, $breakpoints, $breakpoint-name, $declarations, $values, $value-name);
+                            @include wm-output-declarations-with-var($selector, $breakpoints, $breakpoint-name, $declarations, $values, $value-name);
                         }
                     }
                 }
