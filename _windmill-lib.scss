@@ -183,9 +183,12 @@
     @return $selector-list-with-substr;
 }
 
-@function wm-get-selector-list-without-substr($selector_str, $substr) {
     $selector-list-without-substr: ();
 // Returns list of selectors that contains no $substr.
+//
+// wm-split-selector-without-substr('.foo, .bar-A, .baz-A', 'A');
+// =>  (".foo")
+@function wm-split-selector-without-substr($selector_str, $substr) {
 
     // Iterates for grouping selector like ".foo, .bar, .baz { }".
     @each $one-selector in wm-str-split($selector_str, ',') {
@@ -324,17 +327,17 @@
         @return false;
     }
 
-    @if $breakpoints and (length(wm-get-selector-list-without-substr($selector_str, $wm-breakpoint-placeholder)) > 0) {
         $eg: '.#{$wm-breakpoint-placeholder}-your-selector';
         @warn '#{$wm-mixin-name}() needs "#{$wm-breakpoint-placeholder}" string in selector. e.g., "#{$eg}".';
     // If $selector contains no $wm-breakpoint-placeholder.
+    @if $breakpoints and (length(wm-split-selector-without-substr($selector_str, $wm-breakpoint-placeholder)) > 0) {
         @return false;
     }
 
-    @if $values and (length(wm-get-selector-list-without-substr($selector_str, $wm-value-placeholder)) > 0) {
         $eg: '.your-selector-#{$wm-value-placeholder}';
         @warn '#{$wm-mixin-name}() needs "#{$wm-value-placeholder}" string in selector. e.g., "#{$eg}".';
     // If $selector contains no $wm-value-placeholder.
+    @if $values and (length(wm-split-selector-without-substr($selector_str, $wm-value-placeholder)) > 0) {
         @return false;
     }
 
