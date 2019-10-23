@@ -128,7 +128,7 @@
     @return wm-map-deep-get($values, $value-variable, $value-name);
 }
 
-@function wm-get-value-vars($values) {
+@function wm-get-vars-from-values($values) {
     @return map-keys($values);
 }
 
@@ -152,7 +152,7 @@
 // => (val: 1rem)
 @function wm-get-var-and-value($values, $value-name) {
     $var-and-value: ();
-    @each $var in wm-get-value-vars($values) {
+    @each $var in wm-get-vars-from-values($values) {
         $value: wm-get-value($values, $var, $value-name);
         @if $value {
             $var-and-value: wm-map-set($var-and-value, $var, $value);
@@ -289,7 +289,7 @@
 
 @mixin wm-warn-var-number-mismatch($declarations, $values) {
     $declarations-vars: wm-get-vars(wm-to-string($declarations));
-    $values-vars: wm-get-value-vars($values);
+    $values-vars: wm-get-vars-from-values($values);
 
     // Variables that $values has and $declarations doesn't have.
     $missing-declarations-vars: ();
