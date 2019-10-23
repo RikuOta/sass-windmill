@@ -123,6 +123,7 @@
     @return $declarations;
 }
 
+// wm-get-value((val: (1: 1rem, 2: 2rem, 3: 3rem)), val, 1); => 1rem
 @function wm-get-value($values, $value-variable, $value-name) {
     @return wm-map-deep-get($values, $value-variable, $value-name);
 }
@@ -131,6 +132,7 @@
     @return map-keys($values);
 }
 
+// wm-get-value-names((val: (1: 1rem, 2: 2rem, 3: 3rem))) => (1, 2, 3)
 @function wm-get-value-names($values) {
     @return map-keys(wm-map-rest($values, 2));
 }
@@ -215,6 +217,12 @@
     @return wm-map-get-key($breakpoints, false, $min-breakpoint);
 }
 
+// $wm-min-breakpoint-prefix: false; // Global variable.
+// $wm-min-breakpoint-addition: 1;   // Global variable.
+// wm-remove-min-breakpoint-from-selector('all-selector', (all: 0, sm: 576px, md: 768px), all);
+// => ".selector"
+// wm-remove-min-breakpoint-from-selector('all-selector', (all: 0, sm: 576px, md: 768px), sm);
+// => ".all-selector"
 @function wm-remove-min-breakpoint-from-selector($selector_str, $breakpoints, $breakpoint-name) {
     @if $wm-min-breakpoint-prefix {
         @return $selector_str;
