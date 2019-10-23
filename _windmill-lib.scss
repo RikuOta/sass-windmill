@@ -31,6 +31,7 @@
     $new-declarations: ();
     @each $property, $value in $declarations {
         $new-value: wm-to-string($value);
+        $new-value: wm-str-remove($new-value, '"', '\'');
         $new-value: wm-change-doll-to-bracket($new-value);
         $new-declarations: wm-map-set($new-declarations, $property, $new-value);
     }
