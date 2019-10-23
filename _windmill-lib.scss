@@ -310,10 +310,10 @@
     }
 
     @if length($missing-declarations-vars) > 0 {
-        @warn '#{$wm-warning-title}declarations argument is missing variable #{wm-list-to-string(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
+        @warn '#{$wm-warning-title}declarations argument is missing variable #{wm-list-to-text(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
     }
     @if length($missing-values-vars) > 0 {
-        @warn '#{$wm-warning-title}values argument is missing variable #{wm-list-to-string(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
+        @warn '#{$wm-warning-title}values argument is missing variable #{wm-list-to-text(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
     }
 }
 
