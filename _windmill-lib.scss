@@ -104,23 +104,25 @@
 // wm-get-declarations-with-var((width: 1rem, height: [size]));
 // => (height: [size])
 @function wm-get-declarations-with-var($declarations) {
+    $declarations-with-var: ();
     @each $property, $value in $declarations {
-        @if not wm-has-var(wm-to-string($value)) {
-            $declarations: map-remove($declarations, $property);
+        @if wm-has-var(wm-to-string($value)) {
+            $declarations-with-var: wm-map-set($declarations-with-var, $property, $value);
         }
     }
-    @return $declarations;
+    @return $declarations-with-var;
 }
 
 // wm-get-declarations-without-var((width: 1rem, height: [size]));
 // => (width: 1rem)
 @function wm-get-declarations-without-var($declarations) {
+    $declarations-without-var: ();
     @each $property, $value in $declarations {
-        @if wm-has-var(wm-to-string($value)) {
-            $declarations: map-remove($declarations, $property);
+        @if not wm-has-var(wm-to-string($value)) {
+            $declarations-without-var: wm-map-set($declarations-without-var, $property, $value);
         }
     }
-    @return $declarations;
+    @return $declarations-without-var;
 }
 
 // wm-get-value((val: (1: 1rem, 2: 2rem, 3: 3rem)), val, 1); => 1rem
