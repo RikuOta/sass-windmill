@@ -166,9 +166,12 @@
     @return length(wm-str-split($selector_str, ','));
 }
 
-@function wm-get-selector-list-with-substr($selector_str, $substr) {
     $selector-list-with-substr: ();
 // Returns list of selectors that contains $substr.
+//
+// wm-split-selector-with-substr('.foo, .bar-A, .baz-A', 'A');
+// => (".bar-A", ".baz-A")
+@function wm-split-selector-with-substr($selector_str, $substr) {
 
     // Iterates for grouping selector like ".foo, .bar, .baz { }".
     @each $one-selector in wm-str-split($selector_str, ',') {
@@ -335,15 +338,15 @@
         @return false;
     }
 
-    @if (not $breakpoints) and (length(wm-get-selector-list-with-substr($selector_str, $wm-breakpoint-placeholder)) > 0) {
         @warn 'Selector "#{$selector_str}" contains "#{$wm-breakpoint-placeholder}" string.';
     // If $selector contains $wm-breakpoint-placeholder.
+    @if (not $breakpoints) and (length(wm-split-selector-with-substr($selector_str, $wm-breakpoint-placeholder)) > 0) {
         @return false;
     }
 
-    @if (not $values) and (length(wm-get-selector-list-with-substr($selector_str, $wm-value-placeholder)) > 0) {
         @warn 'Selector "#{$selector_str}" contains "#{$wm-value-placeholder}" string.';
     // If $selector contains $wm-value-placeholder.
+    @if (not $values) and (length(wm-split-selector-with-substr($selector_str, $wm-value-placeholder)) > 0) {
         @return false;
     }
 
