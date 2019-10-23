@@ -1,32 +1,64 @@
-// Return declarations that value has value-variable.
-//
-// wm-get-declarations-with-var((width: 1rem, height: '$size$'));
-// => (height: "$size$")
-@function wm-get-declarations-with-var($declarations) {
-    @each $property, $value in $declarations {
-        @if not wm-str-has(wm-to-string($value), '$') {
-            $declarations: map-remove($declarations, $property);
+// ------------------------------
+// Fallback
+// Will be removed in version 1.2.0.
+// ------------------------------
+
+// wm-change-doll-to-bracket('foo $bar$'); => "foo [bar]"
+@function wm-change-doll-to-bracket($string) {
+    $index: 1;
+    @while (true) {
+        $is-odd: $index % 2 != 0;
+
+        @if not wm-str-has($string, '$') {
+            @return $string;
         }
+        @if $is-odd and length(wm-str-indexes($string, '$')) <= 1 {
+            @return $string;
+        }
+
+        @if $is-odd {
+            $string: wm-str-replace($string, '$', '[', true);
+        } @else {
+            $string: wm-str-replace($string, '$', ']', true);
+        }
+        $index: $index + 1;
     }
-    @return $declarations;
 }
 
-// Return declarations that value has no value-variable.
-//
-// wm-get-declarations-without-var((width: 1rem, height: '$size$'));
-// => (width: 1rem)
-@function wm-get-declarations-without-var($declarations) {
+// wm-apply-fallback-to-declarations((margin: '$val$'));
+// => (margin: "[val]")
+@function wm-apply-fallback-to-declarations($declarations) {
+    $new-declarations: ();
     @each $property, $value in $declarations {
-        @if wm-str-has(wm-to-string($value), '$') {
-            $declarations: map-remove($declarations, $property);
-        }
+        $new-value: wm-to-string($value);
+        $new-value: wm-str-remove($new-value, '"', '\'');
+        $new-value: wm-change-doll-to-bracket($new-value);
+        $new-declarations: wm-map-set($new-declarations, $property, $new-value);
     }
-    @return $declarations;
+    @return $new-declarations;
 }
 
+// wm-apply-fallback-to-values(('$val$': foo));
+// => (val: foo)
+@function wm-apply-fallback-to-values($values) {
+    $new-values: ();
+    @each $var, $map in $values {
+        $new-values: wm-map-set($new-values, wm-str-remove($var, '$'), $map);
+    }
+    @return $new-values;
+}
+
+// ------------------------------
+// Shorthand
+// ------------------------------
+
+// wm-make-declarations-with-shorthand(margin);
+// => (margin: "[val]")
+// wm-make-declarations-with-shorthand((margin, true));
+// => (margin: "[val] !important")
 @function wm-make-declarations-with-shorthand($declarations) {
     @if $declarations and (type-of($declarations) == string) {
-        @return ($declarations: '$val$');
+        @return ($declarations: '[val]');
     }
     @if $declarations and (type-of($declarations) == list) {
         $property: nth($declarations, 1);
@@ -35,7 +67,58 @@
         @if $is-important {
             $important-frag: ' !important';
         }
-        @return ($property: '$val$' + $important-frag);
+        @return ($property: '[val]' + $important-frag);
+    }
+    @return $declarations;
+}
+
+// wm-make-values-with-shorthand((1: 1rem, 2: 2rem, 3: 3rem));
+// => (val: (1: 1rem, 2: 2rem, 3: 3rem))
+@function wm-make-values-with-shorthand($values) {
+    @if $values and (wm-map-depth($values) <= 1) {
+        @return (val: $values);
+    }
+    @return $values;
+}
+
+// ------------------------------
+// Main
+// ------------------------------
+
+// wm-get-vars('foo [bar] [baz]'); => ("bar", "baz")
+// wm-get-vars('foo');             => ()
+@function wm-get-vars($string) {
+    $vars: ();
+    $vars: join($vars, wm-str-match($string, '[', ']'));
+    $vars: join($vars, wm-str-match($string, '$', '$')); // Fallback for "$".
+    $vars: wm-list-map($vars, wm-str-remove, '[', ']', '$'); // "$" is fallback.
+    @return $vars;
+}
+
+// wm-has-var('foo [bar] [baz]'); => true
+// wm-has-var('foo');             => false
+@function wm-has-var ($string) {
+    @return length(wm-get-vars($string)) > 0;
+}
+
+// wm-get-declarations-with-var((width: 1rem, height: [size]));
+// => (height: [size])
+@function wm-get-declarations-with-var($declarations) {
+    @each $property, $value in $declarations {
+        @if not wm-has-var(wm-to-string($value)) {
+            $declarations: map-remove($declarations, $property);
+        }
+    }
+    @return $declarations;
+}
+
+// wm-get-declarations-without-var((width: 1rem, height: [size]));
+// => (width: 1rem)
+@function wm-get-declarations-without-var($declarations) {
+    @each $property, $value in $declarations {
+        @if wm-has-var(wm-to-string($value)) {
+            $declarations: map-remove($declarations, $property);
+        }
     }
     @return $declarations;
 }
@@ -45,26 +128,23 @@
 }
 
 @function wm-get-value-vars($values) {
-    $vars: ();
-    @each $var in map-keys($values) {
-        @if wm-str-has(wm-to-string($var), '$') {
-            $vars: append($vars, $var);
-        }
-    }
-    @return wm-list-unique($vars);
+    @return map-keys($values);
 }
 
 @function wm-get-value-names($values) {
-    $value-names: ();
-    @each $key in wm-map-deep-keys($values) {
-        @if not wm-str-has(wm-to-string($key), '$') {
-            $value-names: append($value-names, $key);
-        }
-    }
-    @return wm-list-unique($value-names);
+    @return map-keys(wm-map-rest($values, 2));
 }
 
 // Return a map of (value-variable: value).
+// wm-remove-value-names((val: (1: 1rem, 2: 2rem, 3: 3rem)), 1); => (val: (2: 2rem, 3: 3rem))
+@function wm-remove-value-names($values, $removed-value-names...) {
+    $new-values: ();
+    @each $var, $map in $values {
+        $new-values: wm-map-set($new-values, $var, map-remove($map, $removed-value-names...));
+    }
+    @return $new-values;
+}
+
 //
 // Example:
 // $values: ('$width$': (1: 1rem, 2: 2rem, 3: 3rem))
@@ -79,13 +159,6 @@
         }
     }
     @return $var-and-value;
-}
-
-@function wm-make-values-with-shorthand($values) {
-    @if $values and (length(wm-get-value-vars($values)) < 1) {
-        @return ('$val$': $values);
-    }
-    @return $values;
 }
 
 // wm-get-selector-group-number('.foo, .bar, .baz'); => 3
@@ -131,7 +204,7 @@
     @each $value in $list {
         $grouping-selector: append($grouping-selector, wm-str-replace($selector_str, $replacement_str, $value), 'comma');
     }
-    @return wm-to-string($grouping-selector);
+    @return wm-str-remove(wm-to-string($grouping-selector), '"');
 }
 
 @function wm-get-min-breakpoint-name($breakpoints) {
@@ -164,20 +237,8 @@
     @return wm-str-replace($selector_str, $replacement-str, '');
 }
 
-// Get value based on $value-name and $values of (value-variable: (value-name: value)),
-// push it to value-variable in $declarations of (property: value-variable).
-//
-// Example:
-// $declarations: (
-//     width:  '$width$',
-//     height: '$height$'
-// )
-// $values: (
-//     '$width':   (1: 1rem, 2: 2rem, 3: 3rem),
-//     '$height$': (1: 10px, 2: 20px, 3: 30px)
-// )
-// $value-name: 1
-// => (width: 1rem, height: 10px)
+// wm-push-value-to-declarations((width: [size]), (size: (1: 1rem, 2: 2rem, 3: 3rem)), 1);
+// => (width: 1rem)
 @function wm-push-value-to-declarations($declarations, $values, $value-name) {
     // Push value in $values to value-variable in $declarations.
     $declarations-pushed-value: $declarations;
@@ -186,7 +247,7 @@
             @if wm-str-has(wm-to-string($dec-value), $var) {
                 $new-value: wm-to-string($dec-value);
                 $new-value: wm-str-remove($new-value, '\'', '\"'); // Remove quote of '$variable$'.
-                $new-value: wm-str-replace($new-value, $var, $value);
+                $new-value: wm-str-replace($new-value, '[#{$var}]', $value);
                 $declarations-pushed-value: wm-map-set($declarations-pushed-value, $property, #{$new-value});
             }
         }
@@ -200,7 +261,7 @@
 
 @mixin wm-output-declarations($declarations) {
     @each $property, $value in $declarations {
-        #{$property}: $value;
+        #{$property}: #{$value};
     }
 }
 
@@ -216,8 +277,8 @@
 }
 
 @mixin wm-warn-var-number-mismatch($declarations, $values) {
-    $declarations-vars: wm-map-match($declarations, '$', '$');
-    $values-vars: wm-map-match($values, '$', '$');
+    $declarations-vars: wm-get-vars(wm-to-string($declarations));
+    $values-vars: wm-get-value-vars($values);
 
     // Variables that $values has and $declarations doesn't have.
     $missing-declarations-vars: ();
