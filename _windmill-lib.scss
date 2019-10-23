@@ -361,10 +361,8 @@
 }
 
 @mixin output-styles-with-var($selector_str, $breakpoints, $breakpoint-name, $declarations, $values, $value-name) {
-    @if $breakpoints {
-        $selector_str: wm-str-replace($selector_str, $wm-breakpoint-placeholder, $breakpoint-name);
-    }
     @if $breakpoints and $breakpoint-name {
+        $selector_str: wm-str-replace($selector_str, $wm-breakpoint-placeholder, $breakpoint-name);
         $selector_str: wm-remove-min-breakpoint-from-selector($selector_str, $breakpoints, $breakpoint-name);
     }
     $selector_str: wm-str-replace($selector_str, $wm-value-placeholder, $value-name);
@@ -377,10 +375,8 @@
     @if $values {
         $selector_str: wm-group-selector($selector_str, $wm-value-placeholder, wm-get-value-names($values));
     }
-    @if $breakpoints {
-        $selector_str: wm-str-replace($selector_str, $wm-breakpoint-placeholder, $breakpoint-name);
-    }
     @if $breakpoints and $breakpoint-name {
+        $selector_str: wm-str-replace($selector_str, $wm-breakpoint-placeholder, $breakpoint-name);
         $selector_str: wm-remove-min-breakpoint-from-selector($selector_str, $breakpoints, $breakpoint-name);
     }
     @at-root #{$selector_str} {
