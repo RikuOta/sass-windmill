@@ -166,38 +166,38 @@
     @return length(wm-str-split($selector_str, ','));
 }
 
-    $selector-list-with-substr: ();
 // Returns list of selectors that contains $substr.
 //
 // wm-split-selector-with-substr('.foo, .bar-A, .baz-A', 'A');
 // => (".bar-A", ".baz-A")
 @function wm-split-selector-with-substr($selector_str, $substr) {
+    $selectors-list-with-substr: ();
 
     // Iterates for grouping selector like ".foo, .bar, .baz { }".
     @each $one-selector in wm-str-split($selector_str, ',') {
         $one-selector: wm-str-remove($one-selector, ' ');
         @if wm-str-has($one-selector, $substr) {
-            $selector-list-with-substr: append($selector-list-with-substr, $one-selector);
+            $selectors-list-with-substr: append($selectors-list-with-substr, $one-selector);
         }
     }
-    @return $selector-list-with-substr;
+    @return $selectors-list-with-substr;
 }
 
-    $selector-list-without-substr: ();
 // Returns list of selectors that contains no $substr.
 //
 // wm-split-selector-without-substr('.foo, .bar-A, .baz-A', 'A');
 // =>  (".foo")
 @function wm-split-selector-without-substr($selector_str, $substr) {
+    $selectors-list-without-substr: ();
 
     // Iterates for grouping selector like ".foo, .bar, .baz { }".
     @each $one-selector in wm-str-split($selector_str, ',') {
         $one-selector: wm-str-remove($one-selector, ' ');
         @if not wm-str-has($one-selector, $substr) {
-            $selector-list-without-substr: append($selector-list-without-substr, $one-selector);
+            $selectors-list-without-substr: append($selectors-list-without-substr, $one-selector);
         }
     }
-    @return $selector-list-without-substr;
+    @return $selectors-list-without-substr;
 }
 
 // Replaces $replacement_str in $selector_str by $list,
