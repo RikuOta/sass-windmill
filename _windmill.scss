@@ -34,7 +34,7 @@ $wm-value-placeholder: VAL !default;
 $wm-min-breakpoint-prefix: false !default;
 
 // When $wm-min-breakpoint-prefix is false,
-// number of strings that delete from selector together.
+// the number of strings that delete from selector together.
 //
 // Example:
 // Selector: .foo-SCR-bar
@@ -44,12 +44,12 @@ $wm-min-breakpoint-prefix: false !default;
 // If -2: .fo-bar
 $wm-min-breakpoint-addition: 1 !default;
 
-// Mixin name that use to warn.
-$wm-mixin-name: windmill;
-
 // ------------------------------
 // Main mixin
 // ------------------------------
+
+$wm-mixin-name: 'windmill';
+$wm-warning-title: '[Windmill warn]: ';
 
 @mixin windmill(//
     // A map of (property: value),
@@ -61,19 +61,19 @@ $wm-mixin-name: windmill;
     // Example: (val: (1: 1rem, 2: 2rem, 3: 3rem))
     $values: null,
 
-    // A list of (value-name, value-name, value-name, ...).
-    // You can remove specific value-name in $values.
+    // A list of (value-name, value-name, value-name, ...),
+    // you can remove specific value-name from $values.
     $remove: null,
 
-    // If take $breakpoints, have to contain $wm-breakpoint-placeholder.
-    // Example: .SCR-size
+    // If receives $breakpoints, $selector has to contain $wm-breakpoint-placeholder.
+    // Example: .SCR-foo
     //
-    // If take $values, have to contain $wm-value-placeholder.
-    // Example: .size-VAL
+    // If receives $values, $selector has to contain $wm-value-placeholder.
+    // Example: .foo-VAL
     $selector: null,
     $breakpoints: $wm-breakpoints,
 
-     // If true, output no styles.
+     // If true, outputs no styles.
     $disable: false
 ) {
     $declarations: wm-make-declarations-with-shorthand($declarations);
@@ -88,9 +88,9 @@ $wm-mixin-name: windmill;
     @if $breakpoints == true {
         $breakpoints: $wm-breakpoints;
     }
-    // If contain no $wm-breakpoint-placeholder in $selector,
-    // set false to $breakpoints.
-    @if length(wm-get-selector-list-without-substr($selector, $wm-breakpoint-placeholder)) == wm-get-selector-group-number($selector) {
+    @if length(wm-split-selector-without-substr($selector, $wm-breakpoint-placeholder)) == wm-get-selector-group-number($selector) {
+    // If $selector contains no $wm-breakpoint-placeholder,
+    // sets false to $breakpoints.
         $breakpoints: false;
     }
 
@@ -105,23 +105,23 @@ $wm-mixin-name: windmill;
 
     $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
     @if $no-exception {
-        // Remove specific value-name in $values.
+        // Removes specific value-name from $values.
         @if $values and $remove {
             $values: wm-remove-value-names($values, $remove...);
         }
 
-        // If not match variables number of $declarations and $values, warn.
+        // Warns mismatch that the number of variables in $declarations and $values.
         @if $declarations and $values {
             @include wm-warn-var-number-mismatch($declarations, $values);
         }
 
         @if not $breakpoints {
-            @include output-styles-without-var($selector, false, false, $declarations, $values) {
+            @include wm-output-declarations-without-var($selector, false, false, $declarations, $values) {
                 @content;
             }
             @if $declarations and $values {
                 @each $value-name in wm-get-value-names($values) {
-                    @include output-styles-with-var($selector, false, false, $declarations, $values, $value-name);
+                    @include wm-output-declarations-with-var($selector, false, false, $declarations, $values, $value-name);
                 }
             }
         }
@@ -129,12 +129,12 @@ $wm-mixin-name: windmill;
         @if $breakpoints {
             @each $breakpoint-name, $breakpoint in $breakpoints {
                 @include wm-mq($breakpoint) {
-                    @include output-styles-without-var($selector, $breakpoints, $breakpoint-name, $declarations, $values) {
+                    @include wm-output-declarations-without-var($selector, $breakpoints, $breakpoint-name, $declarations, $values) {
                         @content;
                     }
                     @if $declarations and $values {
                         @each $value-name in wm-get-value-names($values) {
-                            @include output-styles-with-var($selector, $breakpoints, $breakpoint-name, $declarations, $values, $value-name);
+                            @include wm-output-declarations-with-var($selector, $breakpoints, $breakpoint-name, $declarations, $values, $value-name);
                         }
                     }
                 }
