@@ -371,7 +371,7 @@
     }
 }
 
-@mixin output-styles-without-var($selector_str, $breakpoints, $breakpoint-name, $declarations, $values) {
+@mixin wm-output-declarations-without-var($selector_str, $breakpoints, $breakpoint-name, $declarations, $values) {
     @if $values {
         $selector_str: wm-group-selector($selector_str, $wm-value-placeholder, wm-get-value-names($values));
     }

@@ -116,7 +116,7 @@ $wm-warning-title: '[Windmill warn]: ';
         }
 
         @if not $breakpoints {
-            @include output-styles-without-var($selector, false, false, $declarations, $values) {
+            @include wm-output-declarations-without-var($selector, false, false, $declarations, $values) {
                 @content;
             }
             @if $declarations and $values {
@@ -129,7 +129,7 @@ $wm-warning-title: '[Windmill warn]: ';
         @if $breakpoints {
             @each $breakpoint-name, $breakpoint in $breakpoints {
                 @include wm-mq($breakpoint) {
-                    @include output-styles-without-var($selector, $breakpoints, $breakpoint-name, $declarations, $values) {
+                    @include wm-output-declarations-without-var($selector, $breakpoints, $breakpoint-name, $declarations, $values) {
                         @content;
                     }
                     @if $declarations and $values {
