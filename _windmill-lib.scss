@@ -382,7 +382,9 @@
         $selector_str: wm-remove-min-breakpoint-from-selector($selector_str, $breakpoints, $breakpoint-name);
     }
     @at-root #{$selector_str} {
-        @include wm-output-declarations(wm-get-declarations-without-var($declarations));
+        @if $declarations {
+            @include wm-output-declarations(wm-get-declarations-without-var($declarations));
+        }
         @content;
     }
 }
