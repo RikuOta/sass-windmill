@@ -129,6 +129,16 @@
     @return wm-get-vars(wm-list-to-text(map-values($declarations)));
 }
 
+// wm-declarations-to-string((margin: 10px 20px)); => (margin: "10px 20px")
+@function wm-declarations-to-string($declarations) {
+    $new-declarations: ();
+    @each $property, $value in $declarations {
+        $new-value_str: quote($value + '');
+        $new-declarations: wm-map-set($new-declarations, $property, $new-value_str);
+    }
+    @return $new-declarations;
+}
+
 // wm-get-value((val: (1: 1rem, 2: 2rem, 3: 3rem)), val, 1); => 1rem
 @function wm-get-value($values, $value-variable, $value-name) {
     @return wm-map-deep-get($values, $value-variable, $value-name);
