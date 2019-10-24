@@ -3,201 +3,155 @@
 // Override default settings.
 $wm-breakpoints: (
     all: 0,
-    pc: 769px
+    sm: 576px,
+    // md: 768px
 );
 $wm-breakpoint-placeholder: SCR;
 $wm-value-placeholder: VAL;
 $wm-min-breakpoint-prefix: false;
 $wm-min-breakpoint-addition: 1;
 
-// Test preference.
-$valid-test-nums: 0, 1;
-$is-all-test-valid: false;
+// If set a id or list of ids, outputs test with specified id.
+// If set "all" string, outputs all test.
+// If set null, outputs nothing.
+$test-setting: all;
 
-$current-test-num: 0 !default;
-@mixin test_windmill($args...) {
-    @if $is-all-test-valid {
-        @include windmill($args...) {
+@mixin test-windmill($id, $windmill-args...) {
+    @if $test-setting == null {
+        // Outputs nothing
+    } @else if $test-setting == all {
+        @include windmill($windmill-args...) {
             @content;
         }
-    } @else {
-        @each $valid-test-num in $valid-test-nums {
-            @if $valid-test-num == $current-test-num {
-                @include windmill($args...) {
+    } @else if type-of($test-setting) == string {
+        @if $id == $test-setting {
+            @include windmill($windmill-args...) {
+                @content;
+            }
+        }
+    } @else if type-of($test-setting) == list {
+        @each $specified-id in $test-setting {
+            @if $id == $specified-id {
+                @include windmill($windmill-args...) {
                     @content;
                 }
             }
         }
     }
-    $current-test-num: $current-test-num + 1 !global;
 }
 
-$test_values: (
+$test-values: (
     1: 1rem,
-    2: -1rem,
-    3: test,
-    4: "test"
+    2: '2rem',
+    3: "3rem",
+    4: -4rem,
+    auto: auto
 );
+
+/* ------------------------------
+Fallback
+Will be removed in version 1.2.0
+------------------------------ */
+
+.SCR-test-VAL {
+    @include test-windmill(
+        $id: fallback,
+        $declarations: (margin: -"$val$" 0),
+        $values: ('$val$': $test-values)
+    );
+}
 
 /* ------------------------------
 Omit the breakpoint-placeholder
 ------------------------------ */
+
 .test {
-    @include test_windmill() {
+    @include test-windmill(
+        $id: omit
+    ) {
         display: block;
     }
 }
 
+/* with $values */
+
 .test-VAL {
-    @include test_windmill(
-        $declarations: (margin: '$val$'),
-        $values: ('$val$': $test_values)
+    @include test-windmill(
+        $id: omit,
+        $declarations: (margin: [val]),
+        $values: (val: $test-values)
     );
 }
 
 /* ------------------------------
-Take $selector without breakpoints
+Shorthand
 ------------------------------ */
-@include test_windmill(
-    $selector: '.test',
-    $breakpoints: false
-) {
-    margin: 0
+
+.SCR-test-VAL {
+    @include test-windmill(
+        $id: shorthand,
+        $declarations: margin,
+        $values: $test-values
+    );
+}
+
+/* with important frag */
+
+.SCR-test-VAL {
+    @include test-windmill(
+        $id: shorthand,
+        $declarations: (margin, true),
+        $values: $test-values
+    );
 }
 
 /* ------------------------------
-Take $selector with breakpoints
+Main
 ------------------------------ */
 
-@include test_windmill(
-    $selector: '.SCR-test',
-    $breakpoints: $wm-breakpoints
-) {
-    margin: 0
-}
-
-/* ------------------------------
-Use @content without breakpoints
------------------------------- */
-.test {
-    @include test_windmill(
-        $breakpoints: false
-    ) {
-        margin: 0
-    }
-}
-
-/* ------------------------------
-Use @content with breakpoints
------------------------------- */
 .SCR-test {
-    @include test_windmill(
-        $breakpoints: $wm-breakpoints
+    @include test-windmill(
+        $id: main
     ) {
-        margin: 0
+        display: block;
     }
 }
 
-/* ------------------------------
-Take $declarations without breakpoints
------------------------------- */
-.test {
-    @include test_windmill(
-        $declarations: (margin: 0),
-        $breakpoints: false
-    );
-}
+/* Use $declarations and content block */
 
-/* ------------------------------
-Take $declarations with breakpoints
------------------------------- */
 .SCR-test {
-    @include test_windmill(
-        $declarations: (margin: 0),
-        $breakpoints: $wm-breakpoints
-    );
-}
-
-/* ------------------------------
-Use value-variable without breakpoints
------------------------------- */
-.test-VAL {
-    @include test_windmill(
-        $declarations: (margin: '$val$'),
-        $values: ('$val$': $test_values),
-        $breakpoints: false
-    );
-}
-
-/* ------------------------------
-Use value-variable with breakpoints
------------------------------- */
-.SCR-test-VAL {
-    @include test_windmill(
-        $declarations: (margin: '$val$'),
-        $values: ('$val$': $test_values),
-        $breakpoints: $wm-breakpoints
-    );
-}
-
-/* ------------------------------
-Mixed with value-variable, without breakpoints
------------------------------- */
-.test-VAL {
-    @include test_windmill(
-        $declarations: (margin: '$val$'),
-        $values: ('$val$': $test_values),
-        $breakpoints: false
+    @include test-windmill(
+        $id: main,
+        $declarations: (
+            display: block
+        )
     ) {
-        content: 'foo'
+        text-align: center;
+    }
+}
+
+/* Use $declarations and content block and $values */
+
+.SCR-test-VAL {
+    @include test-windmill(
+        $id: main,
+        $declarations: (
+            display: block,
+            margin: -[val] 0
+        ),
+        $values: $test-values
+    ) {
+        text-align: center;
     }
 }
 
 /* ------------------------------
-Mixed with value-variable, with breakpoints
+Use $selector
 ------------------------------ */
-.SCR-test-VAL {
-    @include test_windmill(
-        $declarations: (margin: '$val$'),
-        $values: ('$val$': $test_values),
-        $breakpoints: $wm-breakpoints
-    ) {
-        content: 'foo'
-    }
-}
 
-/* ------------------------------
-Use value-variable as part
------------------------------- */
-.test-VAL {
-    @include test_windmill(
-        $declarations: (margin: 0 '$val$' 0 0),
-        $values: ('$val$': $test_values),
-        $breakpoints: false
-    );
-}
-
-/* ------------------------------
-Use value-variable with negative unit
------------------------------- */
-.test-VAL {
-    @include test_windmill(
-        $declarations: (margin: -'$val$'),
-        $values: ('$val$': $test_values),
-        $breakpoints: false
-    );
-}
-
-/* ------------------------------
-Use shorthand
------------------------------- */
-.SCR-test-VAL {
-    @include test_windmill(margin, $test_values);
-}
-
-/* ------------------------------
-Use shorthand with important frag
------------------------------- */
-.SCR-test-VAL {
-    @include test_windmill((margin, true), $test_values);
+@include test-windmill(
+    $id: selector,
+    $selector: '.SCR-foo'
+) {
+    display: block;
 }
