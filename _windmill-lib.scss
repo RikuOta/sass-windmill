@@ -125,6 +125,10 @@
     @return $declarations-without-var;
 }
 
+@function wm-get-vars-from-declarations($declarations) {
+    @return wm-get-vars(wm-list-to-text(map-values($declarations)));
+}
+
 // wm-get-value((val: (1: 1rem, 2: 2rem, 3: 3rem)), val, 1); => 1rem
 @function wm-get-value($values, $value-variable, $value-name) {
     @return wm-map-deep-get($values, $value-variable, $value-name);
@@ -212,7 +216,7 @@
     @each $value in $list {
         $grouping-selector: append($grouping-selector, wm-str-replace($selector_str, $replacement_str, $value), 'comma');
     }
-    @return wm-str-remove(wm-to-string($grouping-selector), '"');
+    @return wm-list-to-text($grouping-selector, ', ');
 }
 
 @function wm-get-min-breakpoint-name($breakpoints) {
@@ -241,7 +245,7 @@
 
     $replacement-str: '';
     $removed-addition-str: wm-str-slice-based-on-substr(
-            $selector_str, wm-to-string($breakpoint-name), 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
+            $selector_str, $breakpoint-name + '', 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
     );
     @if $wm-min-breakpoint-addition > 0 {
         $replacement-str: $breakpoint-name + $removed-addition-str;
@@ -290,7 +294,7 @@
 }
 
 @mixin wm-warn-var-number-mismatch($declarations, $values) {
-    $declarations-vars: wm-get-vars(wm-to-string($declarations));
+    $declarations-vars: wm-get-vars-from-declarations($declarations);
     $values-vars: wm-get-vars-from-values($values);
 
     // Variables that $values has and $declarations doesn't have.
@@ -310,10 +314,10 @@
     }
 
     @if length($missing-declarations-vars) > 0 {
-        @warn '#{$wm-warning-title}declarations argument is missing variable #{wm-list-to-string(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
+        @warn '#{$wm-warning-title}declarations argument is missing variable #{wm-list-to-text(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
     }
     @if length($missing-values-vars) > 0 {
-        @warn '#{$wm-warning-title}values argument is missing variable #{wm-list-to-string(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
+        @warn '#{$wm-warning-title}values argument is missing variable #{wm-list-to-text(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
     }
 }
 
@@ -382,7 +386,9 @@
         $selector_str: wm-remove-min-breakpoint-from-selector($selector_str, $breakpoints, $breakpoint-name);
     }
     @at-root #{$selector_str} {
-        @include wm-output-declarations(wm-get-declarations-without-var($declarations));
+        @if $declarations {
+            @include wm-output-declarations(wm-get-declarations-without-var($declarations));
+        }
         @content;
     }
 }
