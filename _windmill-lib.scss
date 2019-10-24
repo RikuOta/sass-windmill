@@ -30,8 +30,7 @@
 @function wm-apply-fallback-to-declarations($declarations) {
     $new-declarations: ();
     @each $property, $value in $declarations {
-        $new-value: wm-to-string($value);
-        $new-value: wm-str-remove($new-value, '"', '\'');
+        $new-value: wm-str-remove($value, '"', '\'');
         $new-value: wm-change-doll-to-bracket($new-value);
         $new-declarations: wm-map-set($new-declarations, $property, $new-value);
     }
@@ -106,7 +105,7 @@
 @function wm-get-declarations-with-var($declarations) {
     $declarations-with-var: ();
     @each $property, $value in $declarations {
-        @if wm-has-var(wm-to-string($value)) {
+        @if wm-has-var($value) {
             $declarations-with-var: wm-map-set($declarations-with-var, $property, $value);
         }
     }
@@ -118,7 +117,7 @@
 @function wm-get-declarations-without-var($declarations) {
     $declarations-without-var: ();
     @each $property, $value in $declarations {
-        @if not wm-has-var(wm-to-string($value)) {
+        @if not wm-has-var($value) {
             $declarations-without-var: wm-map-set($declarations-without-var, $property, $value);
         }
     }
