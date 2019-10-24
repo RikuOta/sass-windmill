@@ -79,6 +79,11 @@ $wm-warning-title: '[Windmill warn]: ';
     $declarations: wm-make-declarations-with-shorthand($declarations);
     $values: wm-make-values-with-shorthand($values);
 
+    // Convert the value to string in $declarations of (property: value).
+    @if $declarations != null {
+        $declarations: wm-declarations-to-string($declarations);
+    }
+
     @if $selector {
         $selector: wm-list-to-text($selector, ', ');
     } @else {
