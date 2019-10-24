@@ -285,9 +285,15 @@
     @return $declarations-pushed-value;
 }
 
+@function wm-fix-invalid-value($value_str) {
+    $value_str: wm-str-replace($value_str, '--', '-'); // For the case that two minuses continue like "--10px".
+    $value_str: wm-str-replace($value_str, '-auto', 'auto');
+    @return $value_str;
+}
+
 @mixin wm-output-declarations($declarations) {
     @each $property, $value in $declarations {
-        #{$property}: #{$value};
+        #{$property}: #{wm-fix-invalid-value($value)};
     }
 }
 
