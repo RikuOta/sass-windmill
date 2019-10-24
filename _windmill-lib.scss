@@ -245,7 +245,7 @@
 
     $replacement-str: '';
     $removed-addition-str: wm-str-slice-based-on-substr(
-            $selector_str, wm-to-string($breakpoint-name), 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
+            $selector_str, $breakpoint-name + '', 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
     );
     @if $wm-min-breakpoint-addition > 0 {
         $replacement-str: $breakpoint-name + $removed-addition-str;
