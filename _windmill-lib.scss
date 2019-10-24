@@ -125,6 +125,10 @@
     @return $declarations-without-var;
 }
 
+@function wm-get-vars-from-declarations($declarations) {
+    @return wm-get-vars(wm-list-to-text(map-values($declarations)));
+}
+
 // wm-get-value((val: (1: 1rem, 2: 2rem, 3: 3rem)), val, 1); => 1rem
 @function wm-get-value($values, $value-variable, $value-name) {
     @return wm-map-deep-get($values, $value-variable, $value-name);
@@ -290,7 +294,7 @@
 }
 
 @mixin wm-warn-var-number-mismatch($declarations, $values) {
-    $declarations-vars: wm-get-vars(wm-to-string($declarations));
+    $declarations-vars: wm-get-vars-from-declarations($declarations);
     $values-vars: wm-get-vars-from-values($values);
 
     // Variables that $values has and $declarations doesn't have.
