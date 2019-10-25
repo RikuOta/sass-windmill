@@ -271,7 +271,7 @@
     @each $var, $value in wm-get-var-and-value($values, $value-name) {
         @each $property, $value-with-var in $declarations-pushed-value {
             @if wm-str-has($value-with-var, $var) {
-                $new-value: wm-str-replace($value-with-var, '[#{$var}]', $value);
+                $new-value: wm-str-replace($value-with-var, '[' + $var + ']', $value);
                 $declarations-pushed-value: wm-map-set($declarations-pushed-value, $property, #{$new-value});
             }
         }
