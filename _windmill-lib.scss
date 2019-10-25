@@ -252,10 +252,10 @@
         @return $selector_str;
     }
 
-    $replacement_str: '';
     $addition_str: wm-str-slice-based-on-substr(
             $selector_str, $breakpoint-name + '', 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
     );
+    $replacement_str: '';
     @if $wm-min-breakpoint-addition > 0 {
         $replacement_str: $breakpoint-name + $addition_str;
     } @else {
