@@ -253,13 +253,13 @@
     }
 
     $replacement_str: '';
-    $removed-addition-str: wm-str-slice-based-on-substr(
+    $addition_str: wm-str-slice-based-on-substr(
             $selector_str, $breakpoint-name + '', 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
     );
     @if $wm-min-breakpoint-addition > 0 {
-        $replacement_str: $breakpoint-name + $removed-addition-str;
+        $replacement_str: $breakpoint-name + $addition_str;
     } @else {
-        $replacement_str: $removed-addition-str + $breakpoint-name
+        $replacement_str: $addition_str + $breakpoint-name
     }
     @return wm-str-replace($selector_str, $replacement_str, '');
 }
