@@ -272,7 +272,6 @@
         @each $property, $value-with-var in $declarations-pushed-value {
             @if wm-str-has(wm-to-string($value-with-var), $var) {
                 $new-value: wm-to-string($value-with-var);
-                $new-value: wm-str-remove($new-value, '\'', '\"'); // Remove quote of '$variable$'.
                 $new-value: wm-str-replace($new-value, '[#{$var}]', $value);
                 $declarations-pushed-value: wm-map-set($declarations-pushed-value, $property, #{$new-value});
             }
