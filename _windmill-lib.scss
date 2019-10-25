@@ -252,16 +252,16 @@
         @return $selector_str;
     }
 
-    $replacement-str: '';
+    $replacement_str: '';
     $removed-addition-str: wm-str-slice-based-on-substr(
             $selector_str, $breakpoint-name + '', 1, abs($wm-min-breakpoint-addition), $wm-min-breakpoint-addition < 0
     );
     @if $wm-min-breakpoint-addition > 0 {
-        $replacement-str: $breakpoint-name + $removed-addition-str;
+        $replacement_str: $breakpoint-name + $removed-addition-str;
     } @else {
-        $replacement-str: $removed-addition-str + $breakpoint-name
+        $replacement_str: $removed-addition-str + $breakpoint-name
     }
-    @return wm-str-replace($selector_str, $replacement-str, '');
+    @return wm-str-replace($selector_str, $replacement_str, '');
 }
 
 // wm-push-value-to-declarations((width: [size]), (size: (1: 1rem, 2: 2rem, 3: 3rem)), 1);
