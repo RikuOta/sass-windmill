@@ -261,7 +261,7 @@
     } @else {
         $replacement_str: $addition_str + $breakpoint-name
     }
-    @return wm-str-replace($selector_str, $replacement_str, '');
+    @return wm-str-remove($selector_str, $replacement_str);
 }
 
 // wm-push-value-to-declarations((width: [size]), (size: (1: 1rem, 2: 2rem, 3: 3rem)), 1);
