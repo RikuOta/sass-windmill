@@ -81,16 +81,6 @@
 // Strings
 // ------------------------------
 
-@function wm-to-string($value) {
-    @if $value == null {
-        @return 'null';
-    }
-    @if type-of($value) == list {
-        @return quote(unquote(#{$value + ''}));
-    }
-    @return quote(unquote(#{$value}));
-}
-
 @function wm-str-has($string, $substring) {
     @return str-index($string, $substring) != null;
 }
@@ -262,73 +252,6 @@
     } @else {
         @return $value-by-first-key;
     }
-}
-
-// wm-map-deep-remove((foo: 100, bar: (foo: 200, bar: 300, baz: 400)), foo, baz);
-// => (bar: (bar: 300))
-@function wm-map-deep-remove($map, $keys...) {
-    @each $removed-key in $keys {
-        @each $m-key, $value in $map {
-            @if $removed-key == $m-key {
-                $map: map-remove($map, $removed-key);
-            }
-            @if ($removed-key != $m-key) and (type-of($value) == map) {
-                $map: map-merge($map, ($m-key: wm-map-deep-remove($value, $keys...)));
-            }
-        }
-    }
-    @return $map;
-}
-
-// wm-map-deep-keys((foo: 100, bar: (foo: 200, bar: 300, baz: 400)));
-// => (foo, bar, baz)
-@function wm-map-deep-keys($map, $keys: false) {
-    $current-keys: ();
-    @each $key, $value in $map {
-        $current-keys: append($current-keys, $key);
-
-        @if type-of($value) == map {
-            @each $key2 in wm-map-deep-keys($value, $current-keys) {
-                $current-keys: append($current-keys, $key2);
-            }
-        }
-    }
-    @return wm-list-unique($current-keys);
-}
-
-// wm-map-deep-values((foo: 100, bar: (foo: 200, bar: 300, baz: 400)));
-// => (100, 200, 300, 400)
-@function wm-map-deep-values($map, $values: false) {
-    $current-values: ();
-    @each $key, $value in $map {
-        @if type-of($value) == map {
-            @each $value2 in wm-map-deep-values($value, $current-values) {
-                $current-values: append($current-values, $value2);
-            }
-        } @else {
-            $current-values: append($current-values, $value);
-        }
-    }
-    @return wm-list-unique($current-values);
-}
-
-// wm-map-match(('-0-': '-1-', '-2-': (3: 4)), '-', '-');
-// => (-0-, -2-, -1-)
-@function wm-map-match($map, $begin-substring, $end-substring) {
-    $matched-string-list: ();
-
-    @each $key in wm-map-deep-keys($map) {
-        @each $matched-string in wm-str-match(#{$key}, $begin-substring, $end-substring) {
-            $matched-string-list: append($matched-string-list, $matched-string);
-        }
-    }
-    @each $value in wm-map-deep-values($map) {
-        @each $matched-string in wm-str-match(#{$value}, $begin-substring, $end-substring) {
-            $matched-string-list: append($matched-string-list, $matched-string);
-        }
-    }
-
-    @return wm-list-unique($matched-string-list);
 }
 
 // wm-map-depth((foo: 100px)); => 1
