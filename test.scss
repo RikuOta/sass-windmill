@@ -49,19 +49,6 @@ $test-values: (
 );
 
 /* ------------------------------
-Fallback
-Will be removed in version 1.2.0
------------------------------- */
-
-.SCR-test-VAL {
-    @include test-windmill(
-        $id: fallback,
-        $declarations: (margin: -'$val$' 0),
-        $values: ('$val$': $test-values)
-    );
-}
-
-/* ------------------------------
 Omit the breakpoint-placeholder
 ------------------------------ */
 
