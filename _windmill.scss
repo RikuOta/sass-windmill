@@ -25,19 +25,19 @@ $wm-mixin-name: 'windmill';
 $wm-warning-title: '[Windmill warn]: ';
 
 @mixin windmill(
-    $declarations: null,
+    $content: null,
     $values: null,
     $remove: null,
     $selector: null,
     $breakpoints: $wm-breakpoints,
     $disable: false
 ) {
-    $declarations: wm-make-declarations-with-shorthand($declarations);
+    $content: wm-make-declarations-with-shorthand($content);
     $values: wm-make-values-with-shorthand($values);
 
-    // Convert the value to string in $declarations of (property: value).
-    @if $declarations != null {
-        $declarations: wm-declarations-to-string($declarations);
+    // Convert the value to string in $content of (property: value).
+    @if $content != null {
+        $content: wm-declarations-to-string($content);
     }
 
     @if $selector {
@@ -55,25 +55,25 @@ $wm-warning-title: '[Windmill warn]: ';
         $breakpoints: false;
     }
 
-    $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
+    $no-exception: wm-handle-exception($selector, $breakpoints, $content, $values, $disable);
     @if $no-exception {
         // Removes specific the value-name from $values.
         @if $values and $remove {
             $values: wm-remove-value-names($values, $remove...);
         }
 
-        // Warns mismatch that the number of variables in $declarations and $values.
-        @if $declarations and $values {
-            @include wm-warn-var-number-mismatch($declarations, $values);
+        // Warns mismatch that the number of variables in $content and $values.
+        @if $content and $values {
+            @include wm-warn-var-number-mismatch($content, $values);
         }
 
         @if not $breakpoints {
-            @include wm-output-declarations-without-var($selector, false, false, $declarations, $values) {
+            @include wm-output-declarations-without-var($selector, false, false, $content, $values) {
                 @content;
             }
-            @if $declarations and $values {
+            @if $content and $values {
                 @each $value-name in wm-get-value-names($values) {
-                    @include wm-output-declarations-with-var($selector, false, false, $declarations, $values, $value-name);
+                    @include wm-output-declarations-with-var($selector, false, false, $content, $values, $value-name);
                 }
             }
         }
@@ -81,12 +81,12 @@ $wm-warning-title: '[Windmill warn]: ';
         @if $breakpoints {
             @each $breakpoint-name, $breakpoint in $breakpoints {
                 @include wm-mq($breakpoint) {
-                    @include wm-output-declarations-without-var($selector, $breakpoints, $breakpoint-name, $declarations, $values) {
+                    @include wm-output-declarations-without-var($selector, $breakpoints, $breakpoint-name, $content, $values) {
                         @content;
                     }
-                    @if $declarations and $values {
+                    @if $content and $values {
                         @each $value-name in wm-get-value-names($values) {
-                            @include wm-output-declarations-with-var($selector, $breakpoints, $breakpoint-name, $declarations, $values, $value-name);
+                            @include wm-output-declarations-with-var($selector, $breakpoints, $breakpoint-name, $content, $values, $value-name);
                         }
                     }
                 }
