@@ -85,9 +85,9 @@ $wm-warning-title: '[Windmill warn]: ';
     }
 
     @if $selector {
-        $selector: wm-list-to-text($selector, ', ');
+        $selector: wm-list-to-text($selector, $separator: ', ');
     } @else {
-        $selector: wm-list-to-text(&, ', ');
+        $selector: wm-list-to-text(&, $separator: ', ');
     }
 
     @if $breakpoints == true {
@@ -110,7 +110,7 @@ $wm-warning-title: '[Windmill warn]: ';
 
     $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
     @if $no-exception {
-        // Removes specific value-name from $values.
+        // Removes specific the value-name from $values.
         @if $values and $remove {
             $values: wm-remove-value-names($values, $remove...);
         }
