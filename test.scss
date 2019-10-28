@@ -60,13 +60,13 @@ Omit the breakpoint-placeholder
     }
 }
 
-/* with $values */
+/* with $vars */
 
 .test-VAL {
     @include test-windmill(
         $id: omit,
         $content: (margin: [val]),
-        $values: (val: $test-values)
+        $vars: (val: $test-values)
     );
 }
 
@@ -78,7 +78,7 @@ Shorthand
     @include test-windmill(
         $id: shorthand,
         $content: margin,
-        $values: $test-values
+        $vars: $test-values
     );
 }
 
@@ -88,7 +88,7 @@ Shorthand
     @include test-windmill(
         $id: shorthand,
         $content: (margin, true),
-        $values: $test-values
+        $vars: $test-values
     );
 }
 
@@ -117,7 +117,7 @@ Main
     }
 }
 
-/* Use $content and content block and $values */
+/* Use $content and content block and $vars */
 
 .SCR-test-VAL {
     @include test-windmill(
@@ -126,7 +126,7 @@ Main
             display: block,
             margin: -[val] 0
         ),
-        $values: (val: $test-values)
+        $vars: (val: $test-values)
     ) {
         text-align: center;
     }
