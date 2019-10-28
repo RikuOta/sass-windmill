@@ -5,11 +5,6 @@
 // Default settings
 // ------------------------------
 
-// Please override with your own preferences
-// after importing this file to your Sass project.
-
-// A map of (breakpoint-name: minimum screen width),
-// order from small to large.
 $wm-breakpoints: (
     all: 0px,
     sm: 576px,
@@ -17,31 +12,9 @@ $wm-breakpoints: (
     lg: 992px,
     xl: 1200px
 ) !default;
-
-// Temporary selector name to be replaced by breakpoint-name.
 $wm-breakpoint-placeholder: SCR !default;
-
-// Temporary selector name to be replaced by value-name.
 $wm-value-placeholder: VAL !default;
-
-// If use the breakpoint-prefix on minimum screen width, set true.
-//
-// Example:
-// Selector: .foo-SCR-bar
-// Breakpoints: (all: 0px, sm: 576px, md: 768px, ...)
-// If true: .foo-all-bar
-// If false: .foo--bar
 $wm-min-breakpoint-prefix: false !default;
-
-// When $wm-min-breakpoint-prefix is false,
-// the number of strings that delete from selector together.
-//
-// Example:
-// Selector: .foo-SCR-bar
-// If 0: .foo--bar
-// If 1: .foo-bar
-// If 2: .foo-ar
-// If -2: .fo-bar
 $wm-min-breakpoint-addition: 1 !default;
 
 // ------------------------------
@@ -51,29 +24,12 @@ $wm-min-breakpoint-addition: 1 !default;
 $wm-mixin-name: 'windmill';
 $wm-warning-title: '[Windmill warn]: ';
 
-@mixin windmill(//
-    // A map of (property: value),
-    // value can contains variables of "[variable]".
-    // Example: (width: 1rem, height: [val])
+@mixin windmill(
     $declarations: null,
-
-    // A map of (value-variable: (value-name: value)).
-    // Example: (val: (1: 1rem, 2: 2rem, 3: 3rem))
     $values: null,
-
-    // A list of (value-name, value-name, value-name, ...),
-    // you can remove specific value-name from $values.
     $remove: null,
-
-    // If receives $breakpoints, $selector has to contain $wm-breakpoint-placeholder.
-    // Example: .SCR-foo
-    //
-    // If receives $values, $selector has to contain $wm-value-placeholder.
-    // Example: .foo-VAL
     $selector: null,
     $breakpoints: $wm-breakpoints,
-
-     // If true, outputs no styles.
     $disable: false
 ) {
     $declarations: wm-make-declarations-with-shorthand($declarations);
@@ -85,9 +41,9 @@ $wm-warning-title: '[Windmill warn]: ';
     }
 
     @if $selector {
-        $selector: wm-list-to-text($selector, ', ');
+        $selector: wm-list-to-text($selector, $separator: ', ');
     } @else {
-        $selector: wm-list-to-text(&, ', ');
+        $selector: wm-list-to-text(&, $separator: ', ');
     }
 
     @if $breakpoints == true {
@@ -110,7 +66,7 @@ $wm-warning-title: '[Windmill warn]: ';
 
     $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
     @if $no-exception {
-        // Removes specific value-name from $values.
+        // Removes specific the value-name from $values.
         @if $values and $remove {
             $values: wm-remove-value-names($values, $remove...);
         }

@@ -2,14 +2,18 @@
 // Lists
 // ------------------------------
 
+// wm-list-has(('foo', 'bar', 'baz'), 'baz'); => true
+// wm-list-has(('foo', 'bar', 'baz'), 'qux'); => false
 @function wm-list-has($list, $value) {
     @return index($list, $value) != null;
 }
 
+// wm-list-last(('foo', 'bar', 'baz')); => baz
 @function wm-list-last($list) {
     @return nth($list, length($list));
 }
 
+// wm-list-unique(('foo', 'bar', 'baz', 'baz')); => "foo" "bar" "baz"
 @function wm-list-unique($list) {
     $unique-list: ();
     @each $value in $list {
@@ -20,36 +24,34 @@
     @return $unique-list;
 }
 
-// wm-list-slice((foo, bar, baz), 1, 2); => (foo)
-// wm-list-slice((foo, bar, baz), 2); => (bar, baz)
+// wm-list-slice(('foo', 'bar', 'baz'), 2);    => "bar" "baz"
+// wm-list-slice(('foo', 'bar', 'baz'), 2, 3); => ("bar",)
 @function wm-list-slice($list, $begin, $end: length($list) + 1) {
-    $sliced-list: ();
-    @each $value in $list {
-        $index: index($list, $value);
-        @if (($index >= $begin) and ($index < $end)) {
-            $sliced-list: append($sliced-list, $value);
+    $new-list: ();
+    @for $i from 1 through length($list) {
+        @if ($i >= $begin) and ($i < $end) {
+            $new-list: append($new-list, nth($list, $i));
         }
     }
-    @return $sliced-list;
+    @return $new-list;
 }
 
-// wm-list-to-text((foo, bar, baz), ' and ', '\"') =>  '"foo" and "bar" and "baz"'
-@function wm-list-to-text($list, $separator: '', $enclosure: '', $ignore-last-separator: true) {
-    @if type-of($list) != list {
-        @return $list;
-    }
-
-    $result-string: '';
+// wm-list-to-text(('foo', 'bar', 'baz'), '[', ']', ',');
+// => [foo],[bar],[baz]
+// wm-list-to-text(('foo', 'bar', 'baz'), '[', ']', ',', false);
+// => [foo],[bar],[baz],
+@function wm-list-to-text($list, $before: '', $after: '', $separator: '', $ignore-last-separator: true) {
+    $result: '';
     @each $value in $list {
-        $result-string: $result-string + $enclosure + $value + $enclosure + $separator;
+        $result: $result + $before + $value + $after + $separator;
     }
     @if $ignore-last-separator {
-        $result-string: str-slice($result-string, 1, (str-length($result-string) - str-length($separator)));
+        $result: str-slice($result, 1, (str-length($result) - str-length($separator)));
     }
-    @return $result-string;
+    @return $result;
 }
 
-// wm-list-map((foo, bar, baz), to-upper-case); => (FOO, BAR, BAZ)
+// wm-list-map(('foo', 'bar', 'baz'), to-upper-case); => "FOO" "BAR" "BAZ"
 @function wm-list-map($list, $callback, $args...) {
     $new-list: ();
     @each $value in $list {
@@ -62,6 +64,9 @@
 // Numbers
 // ------------------------------
 
+// wm-add-unit(10);       => 10px
+// wm-add-unit(10, em);   => 10em
+// wm-add-unit(10em, px); => 10em
 @function wm-add-unit($number, $unit: px) {
     @if unitless($number) {
         @return $number + $unit;
@@ -70,6 +75,7 @@
     }
 }
 
+// wm-remove-unit(10px); => 10
 @function wm-remove-unit($number) {
     @if (type-of($number) == number) and (not unitless($number)) {
         @return $number / ($number * 0 + 1);
@@ -81,20 +87,14 @@
 // Strings
 // ------------------------------
 
-@function wm-to-string($value) {
-    @if $value == null {
-        @return 'null';
-    }
-    @if type-of($value) == list {
-        @return quote(unquote(#{$value + ''}));
-    }
-    @return quote(unquote(#{$value}));
-}
-
+// wm-str-has('foo-bar-baz', 'foo'); => true
+// wm-str-has('foo-bar-baz', 'qux'); => false
 @function wm-str-has($string, $substring) {
     @return str-index($string, $substring) != null;
 }
 
+// wm-str-replace('foo-bar-baz-baz', 'baz', 'qux');      => foo-bar-qux-qux
+// wm-str-replace('foo-bar-baz-baz', 'baz', 'qux' true); => foo-bar-qux-baz
 @function wm-str-replace($string, $substring, $new-substring: '', $is-once: false) {
     $index: str-index($string, $substring);
     @if $index {
@@ -111,7 +111,7 @@
     }
 }
 
-// wm-str-remove(foobarbaz, foo, baz); => bar
+// wm-str-remove('foo-bar-baz', foo, bar); => --baz
 @function wm-str-remove($string, $substrings...) {
     @each $substring in $substrings {
         $string: wm-str-replace($string, $substring, '');
@@ -119,72 +119,61 @@
     @return $string;
 }
 
-// wm-str-indexes('foo,bar,baz', ','); => (4 8)
+// wm-str-indexes('foo-bar-baz', '-'); => 4 8
 @function wm-str-indexes($string, $substring) {
-    @if not wm-str-has($string, $substring) {
-        @return null;
-    }
-
-    $condition: true;
-    $tmp-string: $string;
     $indexes: ();
     $before-index: 0;
-    @while $condition {
-        $index: str-index($tmp-string, $substring);
+    @while true {
+        $index: str-index($string, $substring);
         @if $index {
             $indexes: append($indexes, $index + $before-index);
             $before-index: $before-index + $index;
-            $tmp-string: str-slice($tmp-string, $index + 1);
+            $string: str-slice($string, $index + 1);
         } @else {
-            $condition: false;
+            @return $indexes;
         }
     }
-    @return $indexes;
 }
 
-// wm-str-split('foo,bar,baz', ','); => ("foo" "bar" "baz")
+// wm-str-split('foo-bar-baz', '-'); => "foo" "bar" "baz"
 @function wm-str-split($string, $separator) {
     @if not wm-str-has($string, $separator) {
         @return append((), $string);
     }
 
     $list: ();
-    $indexes: wm-str-indexes($string, $separator);
-    @for $i from 1 through length($indexes) {
-        $begin-index: 1;
-        $end-index: nth($indexes, 1) - 1;
-        @if $i > 1 {
-            $begin-index: nth($indexes, $i - 1) + 1;
-            $end-index: nth($indexes, $i) - 1;
+    @while true {
+        $index: str-index($string, $separator);
+        @if $index {
+            $list: append($list, str-slice($string, 1, $index - 1));
+            $string: str-slice($string, $index + 1);
+        } @else {
+            @return append($list, $string);
         }
-        $list: append($list, str-slice($string, $begin-index, $end-index));
     }
-    $list: append($list, str-slice($string, wm-list-last($indexes) + 1));
-    @return $list;
 }
 
-// wm-str-slice-based-on-substr(abcdef, cd, 1, 2); => ef
-// wm-str-slice-based-on-substr(abcdef, cd, 1, 2, true); => ab
-@function wm-str-slice-based-on-substr($string, $base-substring, $begin_positive, $end_positive, $back: false) {
+// wm-str-slice-based-on-substr('abc-def-hij', '-def-', 1, 2);       => hi
+// wm-str-slice-based-on-substr('abc-def-hij', '-def-', 1, 2, true); => bc
+@function wm-str-slice-based-on-substr($string, $base-substring, $begin_positive, $end_positive, $is-back: false) {
     @if not wm-str-has($string, $base-substring) {
         @return $string;
     }
 
-    $index: str-index($string, $base-substring);
+    $base-substr-index: str-index($string, $base-substring);
     $base-substr-length: str-length($base-substring);
-    $begin-of-slice: $index + ($begin_positive - 1) + ($base-substr-length - 1) + 1;
-    $end-of-slice: $index + ($end_positive - 1) + ($base-substr-length - 1) + 1;
+    $begin-index: $base-substr-index + $base-substr-length + $begin_positive - 1;
+    $end-index: $base-substr-index + $base-substr-length + $end_positive - 1;
 
-    @if $back {
-        $begin-of-slice: $begin-of-slice - $base-substr-length - $end_positive;
-        $end-of-slice: $end-of-slice - $base-substr-length - $end_positive;
-        @return str-slice($string, $begin-of-slice, $end-of-slice);
+    @if $is-back {
+        $begin-index: $begin-index - $base-substr-length - $end_positive;
+        $end-index: $end-index - $base-substr-length - $end_positive;
     }
 
-    @return str-slice($string, $begin-of-slice, $end-of-slice);
+    @return str-slice($string, $begin-index, $end-index);
 }
 
-// wm-str-match('foo [bar] baz [qux]', '[', ']'); => ("[bar]", "[qux]")
+// wm-str-match('foo [bar] baz [qux]', '[', ']'); => "[bar]" "[qux]"
 @function wm-str-match($string, $begin-substring, $end-substring) {
     $string-list: ();
     @while true {
@@ -217,144 +206,55 @@
     @return map-get($map, nth(map-keys($map), $index));
 }
 
-// wm-map-get-key((foo: 100, bar: 200), 2); => bar
+// wm-map-get-key((foo: 100, bar: 200), 1);          => bar
 // wm-map-get-key((foo: 100, bar: 200), false, 200); => bar
 @function wm-map-get-key($map, $index: false, $value: false) {
-    $result-index: $index;
-    @if $value {
-        $result-index: index(map-values($map), $value);
+    @if (not $index) and $value {
+        $index: index(map-values($map), $value);
     }
-    @if not $result-index {
+    @if (not $index) or $index > length(map-keys($map)) {
         @return null;
     }
-    @if $result-index > length(map-keys($map)) {
-        @return null;
-    }
-    @return nth(map-keys($map), $result-index);
+    @return nth(map-keys($map), $index);
 }
 
-// wm-map-set((foo: 100, bar: 200), baz, 300);
-// => (foo: 100, bar: 200, baz: 300)
-// wm-map-set((foo: 100, bar: 200), false, false, (baz: 300));
-// => (foo: 100, bar: 200, baz: 300)
-@function wm-map-set($map, $key: false, $value: false, $set-map: false) {
-    @if $set-map {
-        @return map-merge($map, $set-map);
-    }
-    @if $key and $value {
-        @return map-merge($map, (unquote($key): $value));
-    }
-    @return $map;
+// wm-map-set((foo: 100, bar: 200), baz, 300);=> (foo: 100, bar: 200, baz: 300)
+@function wm-map-set($map, $key, $value) {
+    @return map-merge($map, ($key: $value));
 }
 
 // wm-map-deep-get((foo: (bar: 100)), foo, bar); => 100
 @function wm-map-deep-get($map, $keys...) {
-    $first-key: nth($keys, 1);
-
-    @if length($keys) < 2 {
-        @return map-get($map, $first-key);
+    @if length($keys) <= 1 {
+        @return map-get($map, nth($keys, 1));
     }
-
-    $value-by-first-key: map-get($map, $first-key);
-    @if type-of($value-by-first-key) == map {
-        $keys-after-two: wm-list-slice($keys, 2);
-        @return wm-map-deep-get($value-by-first-key, $keys-after-two...);
-    } @else {
-        @return $value-by-first-key;
-    }
-}
-
-// wm-map-deep-remove((foo: 100, bar: (foo: 200, bar: 300, baz: 400)), foo, baz);
-// => (bar: (bar: 300))
-@function wm-map-deep-remove($map, $keys...) {
-    @each $removed-key in $keys {
-        @each $m-key, $value in $map {
-            @if $removed-key == $m-key {
-                $map: map-remove($map, $removed-key);
-            }
-            @if ($removed-key != $m-key) and (type-of($value) == map) {
-                $map: map-merge($map, ($m-key: wm-map-deep-remove($value, $keys...)));
-            }
-        }
-    }
-    @return $map;
-}
-
-// wm-map-deep-keys((foo: 100, bar: (foo: 200, bar: 300, baz: 400)));
-// => (foo, bar, baz)
-@function wm-map-deep-keys($map, $keys: false) {
-    $current-keys: ();
     @each $key, $value in $map {
-        $current-keys: append($current-keys, $key);
-
-        @if type-of($value) == map {
-            @each $key2 in wm-map-deep-keys($value, $current-keys) {
-                $current-keys: append($current-keys, $key2);
-            }
+        @if ($key == nth($keys, 1)) and (type-of($value) == map) {
+            $keys: wm-list-slice($keys, 2);
+            @return wm-map-deep-get($value, $keys...);
         }
     }
-    @return wm-list-unique($current-keys);
 }
 
-// wm-map-deep-values((foo: 100, bar: (foo: 200, bar: 300, baz: 400)));
-// => (100, 200, 300, 400)
-@function wm-map-deep-values($map, $values: false) {
-    $current-values: ();
-    @each $key, $value in $map {
-        @if type-of($value) == map {
-            @each $value2 in wm-map-deep-values($value, $current-values) {
-                $current-values: append($current-values, $value2);
-            }
-        } @else {
-            $current-values: append($current-values, $value);
-        }
-    }
-    @return wm-list-unique($current-values);
-}
-
-// wm-map-match(('-0-': '-1-', '-2-': (3: 4)), '-', '-');
-// => (-0-, -2-, -1-)
-@function wm-map-match($map, $begin-substring, $end-substring) {
-    $matched-string-list: ();
-
-    @each $key in wm-map-deep-keys($map) {
-        @each $matched-string in wm-str-match(#{$key}, $begin-substring, $end-substring) {
-            $matched-string-list: append($matched-string-list, $matched-string);
-        }
-    }
-    @each $value in wm-map-deep-values($map) {
-        @each $matched-string in wm-str-match(#{$value}, $begin-substring, $end-substring) {
-            $matched-string-list: append($matched-string-list, $matched-string);
-        }
-    }
-
-    @return wm-list-unique($matched-string-list);
-}
-
-// wm-map-depth((foo: 100px)); => 1
-// wm-map-depth((foo: 100px, bar: (baz: 200px))); => 2
+// wm-map-depth((foo: 100));                  => 1
+// wm-map-depth((foo: 100, bar: (baz: 200))); => 2
 @function wm-map-depth($map) {
-    $depth-num: 1;
+    $depth: 1;
     @each $key, $value in $map {
         @if type-of($value) == map {
-            $depth-num: max(wm-map-depth($value) + 1, $depth-num);
+            $depth: max(wm-map-depth($value) + 1, $depth);
         }
     }
-    @return $depth-num;
+    @return $depth;
 }
 
-// wm-map-rest((foo: 100, bar: (baz: 200)), 1); => (foo: 100, bar: (baz: 200))
-// wm-map-rest((foo: 100, bar: (baz: 200)), 2); => (baz: 200)
-@function wm-map-rest($map, $begin) {
-    @if $begin <= 1 {
-        @return $map;
-    }
-
+// wm-map-fill((foo: 100, bar: (baz: 200))); => (baz: 200)
+@function wm-map-fill($map) {
     $new-map: ();
     @each $key, $value in $map {
         @if type-of($value) == map {
             $new-map: map-merge($new-map, $value);
         }
     }
-    @return wm-map-rest($new-map, $begin - 1);
+    @return $new-map;
 }

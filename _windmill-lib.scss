@@ -3,7 +3,7 @@
 // Will be removed in version 1.2.0.
 // ------------------------------
 
-// wm-change-doll-to-bracket('foo $bar$'); => "foo [bar]"
+// wm-change-doll-to-bracket('foo $bar$'); => foo [bar]
 @function wm-change-doll-to-bracket($string) {
     $index: 1;
     @while (true) {
@@ -25,8 +25,8 @@
     }
 }
 
-// wm-apply-fallback-to-declarations((margin: '$val$'));
-// => (margin: "[val]")
+// wm-apply-fallback-to-declarations((margin: '$foo$'));
+// => (margin: "[foo]")
 @function wm-apply-fallback-to-declarations($declarations) {
     $new-declarations: ();
     @each $property, $value in $declarations {
@@ -37,12 +37,12 @@
     @return $new-declarations;
 }
 
-// wm-apply-fallback-to-values(('$val$': foo));
-// => (val: foo)
+// wm-apply-fallback-to-values(('$foo$': bar));
+// => (foo: bar)
 @function wm-apply-fallback-to-values($values) {
     $new-values: ();
     @each $var, $map in $values {
-        $new-values: wm-map-set($new-values, wm-str-remove($var, '$'), $map);
+        $new-values: wm-map-set($new-values, unquote(wm-str-remove($var, '$')), $map);
     }
     @return $new-values;
 }
@@ -84,7 +84,7 @@
 // Main
 // ------------------------------
 
-// wm-get-vars('foo [bar] [baz]'); => ("bar", "baz")
+// wm-get-vars('foo [bar] [baz]'); => "bar" "baz"
 // wm-get-vars('foo');             => ()
 @function wm-get-vars($string) {
     $vars: ();
@@ -100,8 +100,8 @@
     @return length(wm-get-vars($string)) > 0;
 }
 
-// wm-get-declarations-with-var((width: 1rem, height: [size]));
-// => (height: [size])
+// wm-get-declarations-with-var((width: '1rem', height: '[foo]'));
+// => (height: "[foo]")
 @function wm-get-declarations-with-var($declarations) {
     $declarations-with-var: ();
     @each $property, $value in $declarations {
@@ -112,8 +112,8 @@
     @return $declarations-with-var;
 }
 
-// wm-get-declarations-without-var((width: 1rem, height: [size]));
-// => (width: 1rem)
+// wm-get-declarations-without-var((width: '1rem', height: '[foo]'));
+// => (width: "1rem")
 @function wm-get-declarations-without-var($declarations) {
     $declarations-without-var: ();
     @each $property, $value in $declarations {
@@ -138,7 +138,7 @@
     @return $new-declarations;
 }
 
-// wm-get-value((val: (1: 1rem, 2: 2rem, 3: 3rem)), val, 1); => 1rem
+// wm-get-value((foo: (1: 1rem, 2: 2rem, 3: 3rem)), foo, 1); => 1rem
 @function wm-get-value($values, $value-variable, $value-name) {
     @return wm-map-deep-get($values, $value-variable, $value-name);
 }
@@ -147,12 +147,12 @@
     @return map-keys($values);
 }
 
-// wm-get-value-names((val: (1: 1rem, 2: 2rem, 3: 3rem))) => (1, 2, 3)
+// wm-get-value-names((foo: (1: 1rem, 2: 2rem, 3: 3rem))); => 1, 2, 3
 @function wm-get-value-names($values) {
-    @return map-keys(wm-map-rest($values, 2));
+    @return map-keys(wm-map-fill($values));
 }
 
-// wm-remove-value-names((val: (1: 1rem, 2: 2rem, 3: 3rem)), 1); => (val: (2: 2rem, 3: 3rem))
+// wm-remove-value-names((foo: (1: 1rem, 2: 2rem, 3: 3rem)), 1); => (foo: (2: 2rem, 3: 3rem))
 @function wm-remove-value-names($values, $removed-value-names...) {
     $new-values: ();
     @each $var, $map in $values {
@@ -163,8 +163,8 @@
 
 // Returns a map of (value-variable: value).
 //
-// wm-get-var-and-value((val: (1: 1rem, 2: 2rem, 3: 3rem)), 1);
-// => (val: 1rem)
+// wm-get-var-and-value((foo: (1: 1rem, 2: 2rem, 3: 3rem)), 1);
+// => (foo: 1rem)
 @function wm-get-var-and-value($values, $value-name) {
     $var-and-value: ();
     @each $var in wm-get-vars-from-values($values) {
@@ -184,7 +184,7 @@
 // Returns list of selectors that contains $substr.
 //
 // wm-split-selector-with-substr('.foo, .bar-A, .baz-A', 'A');
-// => (".bar-A", ".baz-A")
+// => ".bar-A" ".baz-A"
 @function wm-split-selector-with-substr($selector_str, $substr) {
     $selectors-list-with-substr: ();
 
@@ -201,7 +201,7 @@
 // Returns list of selectors that contains no $substr.
 //
 // wm-split-selector-without-substr('.foo, .bar-A, .baz-A', 'A');
-// =>  (".foo")
+// => (".foo",)
 @function wm-split-selector-without-substr($selector_str, $substr) {
     $selectors-list-without-substr: ();
 
@@ -225,7 +225,7 @@
     @each $value in $list {
         $grouping-selector: append($grouping-selector, wm-str-replace($selector_str, $replacement_str, $value), 'comma');
     }
-    @return wm-list-to-text($grouping-selector, ', ');
+    @return wm-list-to-text($grouping-selector, $separator: ', ');
 }
 
 @function wm-get-min-breakpoint-name($breakpoints) {
@@ -238,8 +238,8 @@
     @return wm-map-get-key($breakpoints, false, $min-breakpoint);
 }
 
-// $wm-min-breakpoint-prefix: false; // Global variable.
-// $wm-min-breakpoint-addition: 1;   // Global variable.
+// $wm-min-breakpoint-prefix: false;
+// $wm-min-breakpoint-addition: 1;
 // wm-remove-min-breakpoint-from-selector('all-selector', (all: 0, sm: 576px, md: 768px), all);
 // => ".selector"
 // wm-remove-min-breakpoint-from-selector('all-selector', (all: 0, sm: 576px, md: 768px), sm);
@@ -264,8 +264,8 @@
     @return wm-str-remove($selector_str, $replacement_str);
 }
 
-// wm-push-value-to-declarations((width: [size]), (size: (1: 1rem, 2: 2rem, 3: 3rem)), 1);
-// => (width: 1rem)
+// wm-push-value-to-declarations((width: '[foo]'), (foo: (1: 1rem, 2: 2rem, 3: 3rem)), 1);
+// => (width: "1rem")
 @function wm-push-value-to-declarations($declarations, $values, $value-name) {
     $declarations-pushed-value: $declarations;
     @each $var, $value in wm-get-var-and-value($values, $value-name) {
@@ -327,10 +327,10 @@
     }
 
     @if length($missing-declarations-vars) > 0 {
-        @warn '#{$wm-warning-title}declarations argument is missing variable #{wm-list-to-text(wm-list-unique($missing-declarations-vars), ' and ', '\"')}.';
+        @warn '#{$wm-warning-title}declarations argument is missing variable #{wm-list-to-text(wm-list-unique($missing-declarations-vars), '"', '"', ' and ')}.';
     }
     @if length($missing-values-vars) > 0 {
-        @warn '#{$wm-warning-title}values argument is missing variable #{wm-list-to-text(wm-list-unique($missing-values-vars), ' and ', '\"')}.';
+        @warn '#{$wm-warning-title}values argument is missing variable #{wm-list-to-text(wm-list-unique($missing-values-vars), '"', '"', ' and ')}.';
     }
 }
 
