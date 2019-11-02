@@ -342,7 +342,7 @@ Default settings (global variables):
 }
 ```
 
-### Shorthand
+## Shorthand
 
 If there is one property in `$content` and the value is only a variable, you can use shorthand.
 
