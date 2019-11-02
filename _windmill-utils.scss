@@ -27,20 +27,42 @@
     @return $indexes;
 }
 
-// wm-nums-calc((1, 2, 3), 1); => (2, 3, 4)
-@function wm-nums-calc($list, $value) {
-    @for $i from 1 through length($list) {
-        $list: set-nth($list, $i, nth($list, $i) + $value);
-    }
-    @return $list;
-}
-
 // wm-list-next(('foo', 'bar'), 1); => "bar"
 @function wm-list-next($list, $index) {
     @if $index >= length($list) {
         @return null;
     }
     @return nth($list, $index + 1);
+}
+
+// wm-list-unique(('foo', 'bar', 'bar')); => ("foo", "bar")
+@function wm-list-unique($list) {
+    $new-list: ();
+    @each $value in $list {
+        @if not wm-list-has($new-list, $value) {
+            $new-list: append($new-list, $value, comma);
+        }
+    }
+    @return $new-list;
+}
+
+// wm-list-truthy(('foo', '', false, null)); => ("foo")
+@function wm-list-truthy($list) {
+    $new-list: ();
+    @each $value in $list {
+        @if $value and ($value != '') {
+            $new-list: append($new-list, $value, comma);
+        }
+    }
+    @return $new-list;
+}
+
+// wm-nums-calc((1, 2, 3), 1); => (2, 3, 4)
+@function wm-nums-calc($list, $value) {
+    @for $i from 1 through length($list) {
+        $list: set-nth($list, $i, nth($list, $i) + $value);
+    }
+    @return $list;
 }
 
 // wm-list-slice(('foo', 'bar'), 1, 3); => ("foo", "bar")
@@ -102,26 +124,14 @@
     @return $new-list;
 }
 
-// wm-list-unique(('foo', 'bar', 'bar')); => ("foo", "bar")
-@function wm-list-unique($list) {
-    $new-list: ();
-    @each $value in $list {
-        @if not wm-list-has($new-list, $value) {
-            $new-list: append($new-list, $value, comma);
-        }
+// wm-list-remove(('foo', 'bar', 'baz'), 'foo', 'bar'); => ("baz")
+@function wm-list-remove($list, $values...) {
+    $indexes: wm-list-indexes($list, $values...);
+    $indexes: wm-list-truthy($indexes);
+    @if length($indexes) < 1 {
+        @return $list;
     }
-    @return $new-list;
-}
-
-// wm-list-truthy(('foo', '', false, null)); => ("foo")
-@function wm-list-truthy($list) {
-    $new-list: ();
-    @each $value in $list {
-        @if $value and ($value != '') {
-            $new-list: append($new-list, $value, comma);
-        }
-    }
-    @return $new-list;
+    @return wm-list-remove-nth($list, $indexes...)
 }
 
 // wm-list-to-text(('foo', 'bar'), '[', ']', ',');
@@ -160,13 +170,6 @@
         }
     }
     @return $new-list;
-}
-
-// wm-list-subtract(('foo', 'bar', 'baz'), ('foo', 'bar')); => ("baz")
-@function wm-list-subtract($list1, $list2) {
-    $indexes: wm-list-indexes($list2, $list1...);
-    $indexes: wm-list-truthy($indexes);
-    @return wm-list-remove-nth($list1, $indexes...);
 }
 
 // ------------------------------

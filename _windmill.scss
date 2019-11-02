@@ -69,9 +69,9 @@ $wm-warning-title: '[Windmill warn]: ';
         @if $content and $vars {
             $var-names1: wm-styles-get-vars($content);
             $var-names2: map-keys($vars);
-            $missing-var-names1: wm-list-subtract($var-names2, $var-names1);
+            $missing-var-names1: wm-list-remove($var-names2, $var-names1...);
             $missing-var-names1_str: wm-list-to-text(wm-list-unique($missing-var-names1), '"', '"', ' and ');
-            $missing-var-names2: wm-list-subtract($var-names1, $var-names2);
+            $missing-var-names2: wm-list-remove($var-names1, $var-names2...);
             $missing-var-names2_str: wm-list-to-text(wm-list-unique($missing-var-names2), '"', '"', ' and ');
 
             @if length($missing-var-names1) > 0 {
