@@ -411,7 +411,7 @@ If add Important flag to the result of output:
 
 Before:
 
-```
+```scss
 .SCR-test-VAL {
     @include windmill(
         $declarations: (margin: '$your-var-name$'),
@@ -422,7 +422,7 @@ Before:
 
 After:
 
-```
+```scss
 .BR-test-VAL {
     @include windmill(
         $content: (margin: [your-var-name]),
