@@ -1,17 +1,6 @@
-# Sass Windmill [![Build Status](https://travis-ci.org/RikuOta/sass-windmill.svg?branch=master)](https://travis-ci.org/RikuOta/sass-windmill)
+# Sass Windmill [![Build Status](https://travis-ci.org/RikuOta/sass-windmill.svg?branch=master)](https://travis-ci.org/RikuOta/sass-windmill) <img alt="MIT licensed" src="https://img.shields.io/github/license/RikuOta/sass-windmill?color=blue">
 
 A [Sass](https://sass-lang.com/) mixin that helps to define utility class like `.mb-10px` flexibly and simply.
-
-- [How to get started](#how-to-get-started)
-- [Usage](#usage)
-  - [Breakpoints](#breakpoints)
-  - [Generate styles](#generate-styles)
-  - [Other arguments](#other-arguments)
-    - [$remove](#remove)
-    - [$disable](#disable)
-    - [$selector](#selector)
-  - [Shorthand](#shorthand)
-- [License](#license)
 
 Basic example:
 
@@ -30,14 +19,10 @@ $your-project-spaces: (
     3: 3rem
 );
 
-.SCR-mb-VAL {
+.BR-mb-VAL {
     @include windmill(
-        $declarations: (
-            margin-bottom: '$val$'
-        ),
-        $values: (
-            '$val$': $your-project-spaces
-        )
+        $content: (margin-bottom: [val]),
+        $vars: (val: $your-project-spaces)
     );
 }
 ```
@@ -80,81 +65,45 @@ Compiles to:
 }
 ```
 
-## How to get started
+## Table of Contents
 
-[Try it immediately on CodePen.](https://codepen.io/RikuOta/pen/qBWzpwW)
+- [Try immediately](#try-immediately)
+- [Usage](#usage)
+- [Customize](#customize)
+- [Arguments](#arguments)
+- [Shorthand](#shorthand)
+- [Changelog](#changelog)
+- [License](#license)
 
-OR:
+## Try immediately
 
-1. Install:
-
-    ```
-    npm i sass-windmill
-    ```
-
-    or [download sass-windmill](https://github.com/RikuOta/sass-windmill) into your Sass project.  
-    The target is 3 files.
-
-    ```text
-    sass-windmill/
-        ├── _windmill.scss
-        ├── _windmill-utils.scss
-        └── _windmill-lib.scss
-    ```
-
-1. Import the partial in your Sass files and override default settings with your own preferences.
-
-    ```scss
-    @import 'windmill';
-    
-    // A map of (breakpoint-name: minimum screen width),
-    // order from small to large.
-    $wm-breakpoints: (
-        all: 0px,
-        sm: 576px,
-        md: 768px,
-        lg: 992px,
-        xl: 1200px
-    );
-
-    // Temporary selector name to be replaced by breakpoint-name.
-    $wm-breakpoint-placeholder: SCR;
-
-    // Temporary selector name to be replaced by value-name.
-    $wm-value-placeholder: VAL;
-
-    // If use the breakpoint-prefix on minimum screen width, set true.
-    //
-    // Example:
-    // Selector: .foo-SCR-bar
-    // Breakpoints: (all: 0px, sm: 576px, md: 768px, ...)
-    // If true: .foo-all-bar
-    // If false: .foo--bar
-    $wm-min-breakpoint-prefix: false;
-
-    // When $wm-min-breakpoint-prefix is false,
-    // number of strings that delete from selector together.
-    //
-    // Example:
-    // Selector: .foo-SCR-bar
-    // If 0: .foo--bar
-    // If 1: .foo-bar
-    // If 2: .foo-ar
-    // If -2: .fo-bar
-    $wm-min-breakpoint-addition: 1;
-    ```
-
-1. Call (see usage below).
+[You can try immediately on CodePen.](https://codepen.io/RikuOta/pen/qBWzpwW)
 
 ## Usage
 
-### Breakpoints
+Install with [npm](https://www.npmjs.com/):
 
-- Pass breakpoints to `$wm-breakpoints` global variable or `$breakpoints` argument.
-- The breakpoints is a map of (breakpoint-name: minimum screen width), order from small to large.
-- The breakpoint-name replaces the "SCR" string in selector.  
-(You can change the "SCR" string by `$wm-breakpoint-placeholder` global variable).
-- If breakpoint < 1, `windmill()` outputs styles to outside media block.
+```
+npm i sass-windmill
+```
+
+or [download sass-windmill from the repository](https://github.com/RikuOta/sass-windmill) into your Sass project.  
+The target is 3 files:
+
+```text
+sass-windmill/
+    ├── _windmill.scss
+    ├── _windmill-utils.scss
+    └── _windmill-lib.scss
+```
+
+Import the partial in your Sass files:
+
+```scss
+@import 'windmill';
+```
+
+Set the breakpoints that a map of (breakpoint-name: minimum screen width):
 
 ```scss
 $wm-breakpoints: (
@@ -162,17 +111,21 @@ $wm-breakpoints: (
     sm: 576px,
     md: 768px
 );
+```
 
-.SCR-foo {
+Call `windmill()` with the selector that contains the `BR` string:
+
+```scss
+.BR-foo {
     @include windmill() {
         display: block;
     }
 }
 ```
 
-Compiles to:
+As a result, `windmill()` replaces the `BR` string with the `breakpoint-name` except for the minimum screen width, outputs styles on for each breakpoints:
 
- ```css
+```css
 .foo {
   display: block;
 }
@@ -190,47 +143,90 @@ Compiles to:
 }
 ```
 
-Note: `windmill()` uses the mobile first breakpoint system. If you make responsive design, use smaller breakpoint as base and overwrite it with larger breakpoint.
-
-```html
-<!-- .your-selector takes effect on all screens. -->
-<!-- .sm-your-selector takes effect on more than small screens. -->
-<!-- .md-your-selector takes effect on more than medium screens. -->
-<div class="your-selector sm-your-selector md-your-selector"></div>
-```
-
-### Generate styles
-
-- `$declarations` argument is a map of (property: value), and value accepts value-variable of `$variable$`.
-- `$values` argument is a map of (value-variable: (value-name: value)).
-- The value-name replaces the "VAL" string in selector.  
-(You can change the "VAL" string by `$wm-value-placeholder` global variable).
+Instead of the content block, you can use `$content` argument:
 
 ```scss
-$wm-breakpoints: (
-    all: 0,
-    sm: 576px,
-    md: 768px
-);
-
-.SCR-foo-VAL {
+.BR-foo {
     @include windmill(
-        $declarations: (
-            margin:  '$margin$',
-            padding: '$padding$' 0
-        ),
-        $values: (
-            '$margin$': (
-                1: 1rem,
-                2: 2rem,
-                3: 3rem
-            ),
-            '$padding$': (
-                1: 10px,
-                2: 20px,
-                3: 30px
-            )
-        )
+        $content: (display: block)
+    );
+}
+```
+
+The value in `$content` can accepts variables of `[variable-name]`:
+
+```scss
+.BR-foo {
+    @include windmill(
+        $content: (display: [your-var-name])
+    );
+}
+```
+
+If use variables, set `$vars` argument that a map of (variable-name: (value-name: value)), and contain the `VAL` string in the selector.
+
+```scss
+.BR-foo-VAL {
+    @include windmill(
+        $content: (display: [your-var-name]),
+        $vars: (your-var-name: (
+            b: block,
+            n: none,
+            f: flex
+        ))
+    );
+}
+```
+
+As a result, `windmill()` replaces the `VAL` string with the `value-name`, outputs styles of each value:
+
+```css
+.foo-b {
+  display: block;
+}
+.foo-n {
+  display: none;
+}
+.foo-f {
+  display: flex;
+}
+
+@media (min-width: 576px) {
+  .sm-foo-b {
+    display: block;
+  }
+  .sm-foo-n {
+    display: none;
+  }
+  .sm-foo-f {
+    display: flex;
+  }
+}
+
+@media (min-width: 768px) {
+  .md-foo-b {
+    display: block;
+  }
+  .md-foo-n {
+    display: none;
+  }
+  .md-foo-f {
+    display: flex;
+  }
+}
+```
+
+If you don't want to output with breakpoints, just remove the `BR` string from the selector:
+
+```scss
+.foo-VAL {
+    @include windmill(
+        $content: (display: [your-var-name]),
+        $vars: (your-var-name: (
+            b: block,
+            n: none,
+            f: flex
+        ))
     );
 }
 ```
@@ -238,74 +234,33 @@ $wm-breakpoints: (
 Compiles to:
 
 ```css
-.foo-1 {
-  margin: 1rem;
-  padding: 10px 0;
+.foo-b {
+  display: block;
 }
-.foo-2 {
-  margin: 2rem;
-  padding: 20px 0;
+.foo-n {
+  display: none;
 }
-.foo-3 {
-  margin: 3rem;
-  padding: 30px 0;
-}
-
-@media (min-width: 576px) {
-  .sm-foo-1 {
-    margin: 1rem;
-    padding: 10px 0;
-  }
-  .sm-foo-2 {
-    margin: 2rem;
-    padding: 20px 0;
-  }
-  .sm-foo-3 {
-    margin: 3rem;
-    padding: 30px 0;
-  }
-}
-
-@media (min-width: 768px) {
-  .md-foo-1 {
-    margin: 1rem;
-    padding: 10px 0;
-  }
-  .md-foo-2 {
-    margin: 2rem;
-    padding: 20px 0;
-  }
-  .md-foo-3 {
-    margin: 3rem;
-    padding: 30px 0;
-  }
+.foo-f {
+  display: flex;
 }
 ```
 
-Note: If value-variable and normal value mixed, `windmill()` outputs normal value as grouping selector.
+Finally, if there are normal values in the content block or `$content` argument, `windmill()` will combine them together and outputs:
 
 ```scss
-$wm-breakpoints: (
-    all: 0,
-    sm: 576px,
-    md: 768px
-);
-
-.SCR-foo-VAL {
+.foo-VAL {
     @include windmill(
-        $declarations: (
-            margin: '$margin$' // value-variable.
+        $content: (
+            display: [your-var-name], 
+            width: 1rem // Normal value.
         ),
-        $values: (
-            '$margin$': (
-                1: 1rem,
-                2: 2rem,
-                3: 3rem
-            )
-        )
+        $vars: (your-var-name: (
+            b: block,
+            n: none,
+            f: flex
+        ))
     ) {
-        display: block; // Normal value.
-        text-align: center; // Normal value.
+        height: 2rem    // Normal value.
     }
 }
 ```
@@ -313,99 +268,75 @@ $wm-breakpoints: (
 Compiles to:
 
 ```css
-.foo-1, .foo-2, .foo-3 { // Grouping.
+.foo-b, .foo-n, .foo-f {
+  width: 1rem;
+  height: 2rem;
+}
+.foo-b {
   display: block;
-  text-align: center;
 }
-.foo-1 {
-  margin: 1rem;
+.foo-n {
+  display: none;
 }
-.foo-2 {
-  margin: 2rem;
-}
-.foo-3 {
-  margin: 3rem;
-}
-
-@media (min-width: 576px) {
-  .sm-foo-1, .sm-foo-2, .sm-foo-3 { // Grouping.
-    display: block;
-    text-align: center;
-  }
-  .sm-foo-1 {
-    margin: 1rem;
-  }
-  .sm-foo-2 {
-    margin: 2rem;
-  }
-  .sm-foo-3 {
-    margin: 3rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .md-foo-1, .md-foo-2, .md-foo-3 { // Grouping.
-    display: block;
-    text-align: center;
-  }
-  .md-foo-1 {
-    margin: 1rem;
-  }
-  .md-foo-2 {
-    margin: 2rem;
-  }
-  .md-foo-3 {
-    margin: 3rem;
-  }
+.foo-f {
+  display: flex;
 }
 ```
 
-### Other arguments
+## Customize
 
-#### $remove
-You can remove specific value-name in `$values` argument.
+You can override global variables and change the default settings with your own settings after `@import 'windmill'`:
+
+```
+@import 'windmill';
+
+$wm-breakpoints: (all: 0px, sm: 576px, md: 768px, lg: 992px, xl: 1200px);
+$wm-breakpoint-placeholder: BR;
+...
+```
+
+Default settings (global variables):
+
+|Variable|Type|Default|Description|
+|:---|:---|:---|:---|
+|$wm-breakpoints|`map`|`(all: 0px, sm: 576px, md: 768px, lg: 992px, xl: 1200px)`|A map of (breakpoint-name: minimum screen width).|
+|$wm-breakpoint-placeholder|`string`|`BR`|The string that you contain in selector. Will be replaced by the breakpoint-name.|
+|$wm-value-placeholder|`string`|`VAL`|The string that you contain in selector. Will be replaced by the value-name.|
+|$wm-min-breakpoint-prefix|`boolean`|`false`|If contain the breakpoint-name in the selector on the minimum screen width, set true.|
+|$wm-min-breakpoint-addition|`number`|`1`|When $wm-min-breakpoint-prefix is false, the number of strings that delete from the selector together.|
+
+## Arguments
+
+|Argument|Type|Default|Description|
+|:---|:---|:---|:---|
+|$content|`map`|`null`|A map of (property: value).|
+|$vars|`map`|`null`|A map of (variable-name: (value-name: value)).|
+|$remove|`list`|`null`|A list of (value-name, value-name, value-name, ...), you can remove specific value-name from `$vars`.|
+|$selector|`string`|`null`|You can use instead of calling `windmill()` with the selector.|
+|$breakpoints|`map`|`$wm-breakpoints`|Instead of `$wm-breakpoints`, you can set the breakpoints that is used only for that output.|
+|$disable|`boolean`|`false`|If set true, outputs no styles.|
+
+### $remove
 
 ```scss
-$wm-breakpoints: (
-    all: 0,
-    sm: 576px,
-    md: 768px
-);
-
-.SCR-foo-VAL {
+.BR-foo-VAL {
     @include windmill(
-        $remove: (1, 3),
-        $declarations: (
-            margin:  '$margin$',
-            padding: '$padding$'
-        ),
-        $values: (
-            '$margin$': (
-                1: 1rem, // Remove.
-                2: 2rem,
-                3: 3rem  // Remove.
-            ),
-            '$padding$': (
-                1: 10px, // Remove.
-                2: 20px,
-                3: 30px  // Remove.
-            )
-        )
+        $content: (display: [your-var-name]),
+        $vars: (your-var-name: (
+            b: block, // Will be removed.
+            n: none,
+            f: flex   // Will be removed.
+        )),
+        $remove: (b, f)
     );
 }
 ```
 
-#### $disable
-
-If `$disable` argument is true, outputs no styles.
-
-#### $selector
-
-Instead of calling with a selector, you can pass a selector to `$selector` argument.
+### $selector
 
 ```scss
 @include windmill(
-    $selector: '.foo'
+    $selector: '.BR-foo'
 ) {
     display: block;
 }
@@ -413,23 +344,19 @@ Instead of calling with a selector, you can pass a selector to `$selector` argum
 
 ### Shorthand
 
-If there is only one value-variable, you can use shorthand.
+If there is one property in `$content` and the value is only a variable, you can use shorthand.
 
 Before:
 
 ```scss
-.SCR-foo-VAL {
+.BR-foo-VAL {
     @include windmill(
-        $declarations: (
-            margin: '$margin$'
-        ),
-        $values: (
-            '$margin$': (
-                1: 1rem,
-                2: 2rem,
-                3: 3rem
-            )
-        )
+        $content: (display: [your-var-name]),
+        $vars: (your-var-name: (
+            b: block,
+            n: none,
+            f: flex
+        ))
     );
 }
 ```
@@ -437,25 +364,70 @@ Before:
 After:
 
 ```scss
-.SCR-foo-VAL {
+.BR-foo-VAL {
     @include windmill(
-        $declarations: margin,
-        $values: (
-            1: 1rem,
-            2: 2rem,
-            3: 3rem
+        $content: display,
+        $vars: (
+            b: block,
+            n: none,
+            f: flex
         )
     );
 }
+```
 
-// If omit the argument name.
-.SCR-foo-VAL {
-    @include windmill(margin, (1: 1rem, 2: 2rem, 3: 3rem));
+If omit the argument name:
+
+```scss
+.BR-foo-VAL {
+    @include windmill(display, (
+        b: block,
+        n: none,
+        f: flex
+    ));
 }
+```
 
-// If add !important.
-.SCR-foo-VAL {
-    @include windmill((margin, true), (1: 1rem, 2: 2rem, 3: 3rem));
+If add Important flag to the result of output:
+
+```scss
+.BR-foo-VAL {
+    @include windmill((display, true), (
+        b: block,
+        n: none,
+        f: flex
+    ));
+}
+```
+
+## Changelog
+
+### Since version 1.1.0
+
+- Changed default value of `$wm-breakpoint-placeholder` global variable from `SCR` to `BR`.
+- Changed argument name from `$declarations` to `$content`.
+- Changed argument name from `$values` to `$vars`.
+- Changed how to set variables.
+
+Before:
+
+```
+.SCR-test-VAL {
+    @include windmill(
+        $declarations: (margin: '$your-var-name$'),
+        $values: ('$your-var-name$': ...)
+    );
+}
+```
+
+After:
+
+```
+.BR-test-VAL {
+    @include windmill(
+        $content: (margin: [your-var-name]),
+        $vars: (your-var-name: ...)
+    );
 }
 ```
 
