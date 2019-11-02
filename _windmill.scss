@@ -12,8 +12,8 @@ $wm-breakpoints: (
     lg: 992px,
     xl: 1200px
 ) !default;
-$wm-breakpoint-placeholder: SCR !default;
-$wm-value-placeholder: VAL !default;
+$wm-breakpoint-placeholder: 'BR' !default;
+$wm-value-placeholder: 'VAL' !default;
 $wm-min-breakpoint-prefix: false !default;
 $wm-min-breakpoint-addition: 1 !default;
 
@@ -25,24 +25,25 @@ $wm-mixin-name: 'windmill';
 $wm-warning-title: '[Windmill warn]: ';
 
 @mixin windmill(
-    $declarations: null,
-    $values: null,
+    $content: null,
+    $vars: null,
     $remove: null,
     $selector: null,
     $breakpoints: $wm-breakpoints,
     $disable: false
 ) {
-    $declarations: wm-make-declarations-with-shorthand($declarations);
-    $values: wm-make-values-with-shorthand($values);
+    @if $content != null {
+        $content: wm-shorthand-to-styles($content);
+        $content: wm-styles-to-string($content);
+    }
 
-    // Convert the value to string in $declarations of (property: value).
-    @if $declarations != null {
-        $declarations: wm-declarations-to-string($declarations);
+    @if $vars != null {
+        $vars: wm-shorthand-to-vars($vars);
     }
 
     @if $selector {
         $selector: wm-list-to-text($selector, $separator: ', ');
-    } @else {
+    } @else if & {
         $selector: wm-list-to-text(&, $separator: ', ');
     }
 
@@ -51,29 +52,63 @@ $wm-warning-title: '[Windmill warn]: ';
     }
     // If $selector contains no $wm-breakpoint-placeholder,
     // sets false to $breakpoints.
-    @if $selector and length(wm-split-selector-without-substr($selector, $wm-breakpoint-placeholder)) == wm-get-selector-group-number($selector) {
+    @if $selector and (length(wm-selector-split-without-substr($selector, $wm-breakpoint-placeholder)) == wm-selector-get-group-number($selector)) {
         $breakpoints: false;
     }
 
-    $no-exception: wm-handle-exception($selector, $breakpoints, $declarations, $values, $disable);
+    $no-exception: wm-verify-args($content, $vars, $remove, $selector, $breakpoints, $disable);
     @if $no-exception {
-        // Removes specific the value-name from $values.
-        @if $values and $remove {
-            $values: wm-remove-value-names($values, $remove...);
+        // Removes specific the value-name from $vars.
+        @if $remove {
+            @each $var, $map in $vars {
+                $vars: wm-map-set($vars, $var, map-remove($map, $remove...));
+            }
         }
 
-        // Warns mismatch that the number of variables in $declarations and $values.
-        @if $declarations and $values {
-            @include wm-warn-var-number-mismatch($declarations, $values);
+        // Warns mismatch of variables in $content and $vars.
+        @if $content and $vars {
+            $var-names1: wm-styles-get-vars($content);
+            $var-names2: map-keys($vars);
+            $missing-var-names1: wm-list-subtract($var-names2, $var-names1);
+            $missing-var-names1_str: wm-list-to-text(wm-list-unique($missing-var-names1), '"', '"', ' and ');
+            $missing-var-names2: wm-list-subtract($var-names1, $var-names2);
+            $missing-var-names2_str: wm-list-to-text(wm-list-unique($missing-var-names2), '"', '"', ' and ');
+
+            @if length($missing-var-names1) > 0 {
+                @warn '#{$wm-warning-title}There are variables that is not used in $content argument: #{$missing-var-names1_str}';
+            }
+            @if length($missing-var-names2) > 0 {
+                @warn '#{$wm-warning-title}There are variables that is not set to $vars argument: #{$missing-var-names2_str}';
+            }
         }
 
         @if not $breakpoints {
-            @include wm-output-declarations-without-var($selector, false, false, $declarations, $values) {
-                @content;
+            // Pattern 1:
+            // $breakpoints: falsy, $vars: falsy
+            @if not $vars {
+                @include wm-output-styles (
+                    $selector: $selector,
+                    $styles: if($content, wm-styles-remove-vars($content), null)
+                ) {
+                    @content;
+                }
             }
-            @if $declarations and $values {
-                @each $value-name in wm-get-value-names($values) {
-                    @include wm-output-declarations-with-var($selector, false, false, $declarations, $values, $value-name);
+
+            // Pattern 2:
+            // $breakpoints: falsy, $vars: truthy
+            @if $vars {
+                @include wm-output-styles (
+                    $selector: wm-selector-combine($selector, $wm-value-placeholder, map-keys(wm-map-descend($vars))),
+                    $styles: if($content, wm-styles-remove-vars($content), null)
+                ) {
+                    @content;
+                }
+
+                @each $value-name in map-keys(wm-map-descend($vars)) {
+                    @include wm-output-styles (
+                        $selector: wm-selector-build($selector, null, null, $value-name),
+                        $styles: wm-styles-build(wm-styles-remove-normal-values($content), wm-map-skip($vars, $value-name))
+                    );
                 }
             }
         }
@@ -81,12 +116,32 @@ $wm-warning-title: '[Windmill warn]: ';
         @if $breakpoints {
             @each $breakpoint-name, $breakpoint in $breakpoints {
                 @include wm-mq($breakpoint) {
-                    @include wm-output-declarations-without-var($selector, $breakpoints, $breakpoint-name, $declarations, $values) {
-                        @content;
+                    // Pattern 3:
+                    // $breakpoints: truthy, $vars: falsy
+                    @if not $vars {
+                        @include wm-output-styles (
+                            $selector: wm-selector-build($selector, $breakpoints, $breakpoint-name),
+                            $styles: if($content, wm-styles-remove-vars($content), null)
+                        ) {
+                            @content;
+                        }
                     }
-                    @if $declarations and $values {
-                        @each $value-name in wm-get-value-names($values) {
-                            @include wm-output-declarations-with-var($selector, $breakpoints, $breakpoint-name, $declarations, $values, $value-name);
+
+                    // Pattern 4:
+                    // $breakpoints: truthy, $vars: truthy
+                    @if $vars {
+                        @include wm-output-styles (
+                            $selector: wm-selector-build(wm-selector-combine($selector, $wm-value-placeholder, map-keys(wm-map-descend($vars))), $breakpoints, $breakpoint-name),
+                            $styles: if($content, wm-styles-remove-vars($content), null)
+                        ) {
+                            @content;
+                        }
+
+                        @each $value-name in map-keys(wm-map-descend($vars)) {
+                            @include wm-output-styles (
+                                $selector: wm-selector-build($selector, $breakpoints, $breakpoint-name, $value-name),
+                                $styles: wm-styles-build(wm-styles-remove-normal-values($content), wm-map-skip($vars, $value-name))
+                            );
                         }
                     }
                 }

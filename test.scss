@@ -3,35 +3,34 @@
 // Override default settings.
 $wm-breakpoints: (
     all: 0,
-    sm: 576px,
-    // md: 768px
+    sm: 576px
 );
-$wm-breakpoint-placeholder: SCR;
+$wm-breakpoint-placeholder: BR;
 $wm-value-placeholder: VAL;
 $wm-min-breakpoint-prefix: false;
 $wm-min-breakpoint-addition: 1;
 
-// If set a id or list of ids, outputs test with specified id.
-// If set "all" string, outputs all test.
-// If set null, outputs nothing.
-$test-setting: all;
+// If you set test names, outputs target tests.
+// If you set "all" string, outputs all tests.
+// If you set null, outputs nothing.
+$enabled-test-names: all;
 
-@mixin test-windmill($id, $windmill-args...) {
-    @if $test-setting == null {
+@mixin test-windmill($test-name, $windmill-args...) {
+    @if $enabled-test-names == null {
         // Outputs nothing
-    } @else if $test-setting == all {
+    } @else if $enabled-test-names == all {
         @include windmill($windmill-args...) {
             @content;
         }
-    } @else if type-of($test-setting) == string {
-        @if $id == $test-setting {
+    } @else if type-of($enabled-test-names) == string {
+        @if $test-name == $enabled-test-names {
             @include windmill($windmill-args...) {
                 @content;
             }
         }
-    } @else if type-of($test-setting) == list {
-        @each $specified-id in $test-setting {
-            @if $id == $specified-id {
+    } @else if type-of($enabled-test-names) == list {
+        @each $enabled-test-name in $enabled-test-names {
+            @if $test-name == $enabled-test-name {
                 @include windmill($windmill-args...) {
                     @content;
                 }
@@ -49,87 +48,102 @@ $test-values: (
 );
 
 /* ------------------------------
-Omit the breakpoint-placeholder
------------------------------- */
-
-.test {
-    @include test-windmill(
-        $id: omit
-    ) {
-        display: block;
-    }
-}
-
-/* with $values */
-
-.test-VAL {
-    @include test-windmill(
-        $id: omit,
-        $declarations: (margin: [val]),
-        $values: (val: $test-values)
-    );
-}
-
-/* ------------------------------
-Shorthand
------------------------------- */
-
-.SCR-test-VAL {
-    @include test-windmill(
-        $id: shorthand,
-        $declarations: margin,
-        $values: $test-values
-    );
-}
-
-/* with important frag */
-
-.SCR-test-VAL {
-    @include test-windmill(
-        $id: shorthand,
-        $declarations: (margin, true),
-        $values: $test-values
-    );
-}
-
-/* ------------------------------
 Main
 ------------------------------ */
 
-.SCR-test {
+/* Pattern 1: */
+/* $breakpoints: falsy, $vars: falsy */
+
+.test {
     @include test-windmill(
-        $id: main
+        $test-name: main,
+        $breakpoints: false
     ) {
         display: block;
     }
 }
 
-/* Use $declarations and content block */
+/* Pattern 2: */
+/* $breakpoints: falsy, $vars: truthy */
 
-.SCR-test {
+.test-VAL {
     @include test-windmill(
-        $id: main,
-        $declarations: (
-            display: block
-        )
+        $test-name: main,
+        $content: (margin: [val]),
+        $vars: (val: $test-values),
+        $breakpoints: false
+    );
+}
+
+/* Pattern 3: */
+/* $breakpoints: truthy, $vars: falsy */
+
+.BR-test {
+    @include test-windmill(
+        $test-name: main
     ) {
-        text-align: center;
+        display: block;
     }
 }
 
-/* Use $declarations and content block and $values */
+/* Pattern 4: */
+/* $breakpoints: truthy, $vars: truthy */
 
-.SCR-test-VAL {
+.BR-test-VAL {
     @include test-windmill(
-        $id: main,
-        $declarations: (
-            display: block,
-            margin: -[val] 0
+        $test-name: main,
+        $content: (margin: [val]),
+        $vars: (val: $test-values)
+    );
+}
+
+/* ------------------------------
+Omit the breakpoint-placeholder
+------------------------------ */
+
+.test-VAL {
+    @include test-windmill(
+        $test-name: omit,
+        $content: (margin: [val]),
+        $vars: (val: $test-values)
+    );
+}
+
+/* ------------------------------
+Use shorthand function
+------------------------------ */
+
+.BR-test-VAL {
+    @include test-windmill(
+        $test-name: shorthand,
+        $content: margin,
+        $vars: $test-values
+    );
+}
+
+/* with Important frag */
+
+.BR-test-VAL {
+    @include test-windmill(
+        $test-name: shorthand,
+        $content: (margin, true),
+        $vars: $test-values
+    );
+}
+
+/* ------------------------------
+Use $remove
+------------------------------ */
+
+.BR-test-VAL {
+    @include test-windmill(
+        $test-name: remove,
+        $content: (
+            margin: [val]
         ),
-        $values: (val: $test-values)
-    ) {
-        text-align: center;
-    }
+        $vars: (val: $test-values),
+        $remove: (1, 4)
+    );
 }
 
 /* ------------------------------
@@ -137,8 +151,56 @@ Use $selector
 ------------------------------ */
 
 @include test-windmill(
-    $id: selector,
-    $selector: '.SCR-foo'
+    $test-name: selector,
+    $selector: '.BR-foo'
 ) {
     display: block;
+}
+
+/* ------------------------------
+The case where normal declarations are mixed
+------------------------------ */
+
+.BR-test-VAL {
+    @include test-windmill(
+        $test-name: mixed-declarations,
+        $content: (
+            display: block,
+            margin: [val]
+        ),
+        $vars: (val: $test-values)
+    ) {
+        text-align: center;
+    }
+}
+
+/* ------------------------------
+The case where normal values are mixed
+------------------------------ */
+
+.BR-test-VAL {
+    @include test-windmill(
+        $test-name: mixed-values,
+        $content: (
+            margin: auto -[val] 0 auto
+        ),
+        $vars: (val: $test-values)
+    );
+}
+
+/* ------------------------------
+The case where use multiple variables
+------------------------------ */
+
+.BR-test-VAL {
+    @include test-windmill(
+        $test-name: complex,
+        $content: (
+            margin: [val1] [val2]
+        ),
+        $vars: (
+            val1: (1: 10px, 2: 20px, 3: 30px),
+            val2: (3: 3rem, 4: 4rem, 5: 5rem)
+        )
+    );
 }
