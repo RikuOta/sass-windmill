@@ -213,34 +213,6 @@
 // Shorthand
 // ------------------------------
 
-// wm-shorthand-to-styles(margin);
-// => (margin: [val])
-// wm-shorthand-to-styles((margin, true));
-// => (margin: [val] !important)
-@function wm-shorthand-to-styles($shorthand) {
-    @if type-of($shorthand) == string {
-        @return ($shorthand: [val]);
-    }
-    @if type-of($shorthand) == list {
-        $property: nth($shorthand, 1);
-        $is-important: nth($shorthand, 2);
-        @if $is-important {
-            @return ($property: [val] !important);
-        }
-        @return ($property: [val]);
-    }
-    @return $shorthand;
-}
-
-// wm-shorthand-to-vars((1: 1rem, 2: 2rem, 3: 3rem));
-// => (val: (1: 1rem, 2: 2rem, 3: 3rem))
-@function wm-shorthand-to-vars($shorthand) {
-    @if wm-map-depth($shorthand) <= 1 {
-        @return (val: $shorthand);
-    }
-    @return $shorthand;
-}
-
 @function wm-styles-is-shorthand($styles) {
     @if (type-of($styles) == string) or (type-of($styles) == list) {
         @return true;
