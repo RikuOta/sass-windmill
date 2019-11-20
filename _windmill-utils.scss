@@ -223,22 +223,16 @@
     @return $string;
 }
 
-// wm-str-replace('foo bar bar', 'bar', 'baz');       => "foo baz baz"
-// wm-str-replace('foo bar bar', 'bar', 'baz', true); => "foo baz bar"
-@function wm-str-replace($string, $substring, $new-substring: '', $once: false) {
-    $index: str-index($string, $substring);
-    @if $index {
-        $before: str-slice($string, 1, $index - 1);
-        $after: str-slice($string, ($index + str-length($substring)));
-        $new-string: $before + $new-substring + $after;
-        @if not $once {
-            @return wm-str-replace($new-string, $substring, $new-substring);
-        } @else {
-            @return $new-string;
-        }
-    } @else {
+// wm-str-replace('foo bar', 'bar', 'baz'); => "foo baz"
+@function wm-str-replace($string, $substring, $new-substring: '', $begin: 1) {
+    @if not str-index(str-slice($string, $begin), $substring) {
         @return $string;
     }
+    $index: str-index(str-slice($string, $begin), $substring) + $begin - 1;
+    $before: str-slice($string, 1, $index - 1);
+    $after: str-slice($string, ($index + str-length($substring)));
+    $new-string: $before + $new-substring + $after;
+    @return wm-str-replace($new-string, $substring, $new-substring, str-length($before) + str-length($new-substring + '') + 1);
 }
 
 // wm-str-remove('foo bar baz', 'foo', 'bar'); => "  baz"

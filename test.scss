@@ -2,7 +2,7 @@
 
 // Override default settings.
 $wm-breakpoints: (
-    all: 0,
+    0: 0,
     sm: 576px
 );
 $wm-breakpoint-placeholder: BR;
@@ -15,24 +15,20 @@ $wm-min-breakpoint-addition: 1;
 // If you set null, outputs nothing.
 $enabled-test-names: all;
 
-@mixin test-windmill($test-name, $windmill-args...) {
+@mixin test-windmill($test-names, $windmill-args...) {
     @if $enabled-test-names == null {
         // Outputs nothing
     } @else if $enabled-test-names == all {
         @include windmill($windmill-args...) {
             @content;
         }
-    } @else if type-of($enabled-test-names) == string {
-        @if $test-name == $enabled-test-names {
-            @include windmill($windmill-args...) {
-                @content;
-            }
-        }
-    } @else if type-of($enabled-test-names) == list {
+    } @else {
         @each $enabled-test-name in $enabled-test-names {
-            @if $test-name == $enabled-test-name {
-                @include windmill($windmill-args...) {
-                    @content;
+            @each $test-name in $test-names {
+                @if $test-name == $enabled-test-name {
+                    @include windmill($windmill-args...) {
+                        @content;
+                    }
                 }
             }
         }
@@ -56,7 +52,7 @@ Main
 
 .test {
     @include test-windmill(
-        $test-name: main,
+        $test-names: (main, main1),
         $breakpoints: false
     ) {
         display: block;
@@ -68,7 +64,7 @@ Main
 
 .test-VAL {
     @include test-windmill(
-        $test-name: main,
+        $test-names: (main, main2),
         $content: (margin: [val]),
         $vars: (val: $test-values),
         $breakpoints: false
@@ -80,7 +76,7 @@ Main
 
 .BR-test {
     @include test-windmill(
-        $test-name: main
+        $test-names: (main, main3)
     ) {
         display: block;
     }
@@ -91,7 +87,7 @@ Main
 
 .BR-test-VAL {
     @include test-windmill(
-        $test-name: main,
+        $test-names: (main, main4),
         $content: (margin: [val]),
         $vars: (val: $test-values)
     );
@@ -103,7 +99,7 @@ Omit the breakpoint-placeholder
 
 .test-VAL {
     @include test-windmill(
-        $test-name: omit,
+        $test-names: omit,
         $content: (margin: [val]),
         $vars: (val: $test-values)
     );
@@ -115,7 +111,7 @@ Use shorthand function
 
 .BR-test-VAL {
     @include test-windmill(
-        $test-name: shorthand,
+        $test-names: shorthand,
         $content: margin,
         $vars: $test-values
     );
@@ -125,7 +121,7 @@ Use shorthand function
 
 .BR-test-VAL {
     @include test-windmill(
-        $test-name: shorthand,
+        $test-names: shorthand,
         $content: (margin, true),
         $vars: $test-values
     );
@@ -137,7 +133,7 @@ Use $remove
 
 .BR-test-VAL {
     @include test-windmill(
-        $test-name: remove,
+        $test-names: remove,
         $content: (
             margin: [val]
         ),
@@ -151,7 +147,7 @@ Use $selector
 ------------------------------ */
 
 @include test-windmill(
-    $test-name: selector,
+    $test-names: selector,
     $selector: '.BR-foo'
 ) {
     display: block;
@@ -163,10 +159,10 @@ The case where normal declarations are mixed
 
 .BR-test-VAL {
     @include test-windmill(
-        $test-name: mixed-declarations,
+        $test-names: mixed1,
         $content: (
-            display: block,
-            margin: [val]
+            margin: [val],
+            display: inline-block,
         ),
         $vars: (val: $test-values)
     ) {
@@ -180,9 +176,9 @@ The case where normal values are mixed
 
 .BR-test-VAL {
     @include test-windmill(
-        $test-name: mixed-values,
+        $test-names: mixed2,
         $content: (
-            margin: auto -[val] 0 auto
+            margin: 1rem -[val] 1rem -[val]
         ),
         $vars: (val: $test-values)
     );
@@ -194,7 +190,7 @@ The case where use multiple variables
 
 .BR-test-VAL {
     @include test-windmill(
-        $test-name: complex,
+        $test-names: complex,
         $content: (
             margin: [val1] [val2]
         ),

@@ -57,7 +57,7 @@
 
 // wm-styles-remove-vars((width: '1rem', height: '[foo]'));
 // => (width: "1rem")
-@function wm-styles-remove-vars($styles) {
+@function wm-styles-get-normal-values($styles) {
     $new-styles: ();
     @each $property, $value in $styles {
         @if not wm-vars-has($value) {
@@ -79,6 +79,35 @@
                 $styles: wm-map-set($styles, $property, $new-value);
             }
         }
+    }
+    @return $styles;
+}
+
+@function wm-styles-fix-before-building($styles) {
+    @each $property, $value_str in $styles {
+        // Because a space after a minus sign
+        // like "1em -[val]" or "[val] -1em" is removed, makes up.
+        $value_str: wm-str-replace($value_str, '-[', ' -[');
+        $value_str: wm-str-replace($value_str, ']-', '] -');
+
+        $styles: wm-map-set($styles, $property, $value_str);
+    }
+    @return $styles;
+}
+
+@function wm-styles-fix-after-building($styles) {
+    @each $property, $value_str in $styles {
+        // Removes remaining variables like "1rem [foo]".
+        $value_str: wm-vars-remove($value_str);
+
+        // Fix the case that two minuses continue like "--10px".
+        $value_str: wm-str-replace($value_str, '--', '-');
+
+        // Fix invalid values.
+        $value_str: wm-str-replace($value_str, '-auto', 'auto');
+        $value_str: wm-str-replace($value_str, '-none', 'none');
+
+        $styles: wm-map-set($styles, $property, wm-str-trim($value_str));
     }
     @return $styles;
 }
@@ -144,7 +173,7 @@
 // wm-selector-remove-min-breakpoint('.all-selector', (all: 0, sm: 576px, md: 768px), 1);
 // => ".selector"
 @function wm-selector-remove-min-breakpoint($selector, $breakpoints, $addition) {
-    $min-breakpoint-name: wm-map-key(wm-map-min($breakpoints), 1);
+    $min-breakpoint-name: wm-map-key(wm-map-min($breakpoints), 1) + '';
     $first-index: str-index($selector, $min-breakpoint-name);
     $last-index: wm-str-last-index($selector, $min-breakpoint-name);
 
@@ -278,29 +307,12 @@
     }
 }
 
-@function wm-fix-invalid-value($value_str) {
-    // Removes remaining variables like "1rem [foo]".
-    $value_str: wm-vars-remove($value_str);
-
-    // For the case that two minuses continue like "--10px".
-    $value_str: wm-str-replace($value_str, '--', '-');
-
-    // Because a specified like "auto -[val]" is converted to "auto-[val]",
-    // add a space before the minus.
-    $value_str: wm-str-replace($value_str, '-', ' -', true);
-
-    $value_str: wm-str-replace($value_str, '-auto', 'auto');
-    $value_str: wm-str-replace($value_str, '-none', 'none');
-    $value_str: wm-str-trim($value_str);
-    @return $value_str;
-}
-
 @mixin wm-output-styles($selector, $styles: null) {
     @at-root {
         #{$selector} {
             @if $styles {
                 @each $property, $value in $styles {
-                    #{$property}: #{wm-fix-invalid-value($value)};
+                    #{$property}: #{$value};
                 }
             }
             @content;
