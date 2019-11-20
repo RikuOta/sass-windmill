@@ -26,6 +26,15 @@
 }
 
 // ------------------------------
+// Breakpoints
+// ------------------------------
+
+@function wm-get-min-breakpoint-name($breakpoints) {
+    $values: map-values($breakpoints);
+    @return wm-map-key($breakpoints, index($values, min($values...)));
+}
+
+// ------------------------------
 // Styles
 // ------------------------------
 
@@ -173,7 +182,7 @@
 // wm-selector-remove-min-breakpoint('.all-selector', (all: 0, sm: 576px, md: 768px), 1);
 // => ".selector"
 @function wm-selector-remove-min-breakpoint($selector, $breakpoints, $addition) {
-    $min-breakpoint-name: wm-map-key(wm-map-min($breakpoints), 1) + '';
+    $min-breakpoint-name: wm-get-min-breakpoint-name($breakpoints);
     $first-index: str-index($selector, $min-breakpoint-name);
     $last-index: wm-str-last-index($selector, $min-breakpoint-name);
 
@@ -200,7 +209,7 @@
     @if $breakpoint-name {
         $base-selector: wm-str-replace($base-selector, $wm-breakpoint-placeholder, $breakpoint-name);
     }
-    @if $breakpoints and (not $wm-min-breakpoint-prefix) {
+    @if $breakpoints and (not $wm-min-breakpoint-prefix) and ($breakpoint-name == wm-get-min-breakpoint-name($breakpoints)) {
         $base-selector: wm-selector-remove-min-breakpoint($base-selector, $breakpoints, $wm-min-breakpoint-addition);
     }
     @if $value-name {

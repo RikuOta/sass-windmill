@@ -158,20 +158,6 @@
     @return $new-list;
 }
 
-// wm-list-filter-type(('foo', 'bar', 100, true), 'string', 'number');
-// => ("foo", "bar", 100)
-@function wm-list-filter-type($list, $types...) {
-    $new-list: ();
-    @each $value in $list {
-        @each $type in $types {
-            @if type-of($value) == $type {
-                $new-list: append($new-list, $value, comma);
-            }
-        }
-    }
-    @return $new-list;
-}
-
 // ------------------------------
 // Numbers
 // ------------------------------
@@ -380,13 +366,4 @@
         }
     }
     @return $new-map;
-}
-
-// Returns a map that has minimum value.
-// wm-map-min((key: 30, key2: 20, key3: 10)); => (key3: 10)
-@function wm-map-min($map) {
-    $values: wm-list-filter-type(map-values($map), number);
-    $min-value: min($values...);
-    $min-key: wm-map-key($map, index($values, $min-value));
-    @return ($min-key: $min-value);
 }
