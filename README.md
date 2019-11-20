@@ -1,6 +1,6 @@
 # Sass Windmill [![Build Status](https://travis-ci.org/RikuOta/sass-windmill.svg?branch=master)](https://travis-ci.org/RikuOta/sass-windmill) <img alt="MIT licensed" src="https://img.shields.io/github/license/RikuOta/sass-windmill?color=blue">
 
-A [Sass](https://sass-lang.com/) mixin that helps to define utility class like `.mb-10px` flexibly and simply.
+A [Sass](https://sass-lang.com/) mixin that helps you define utility classes like `.mb-10px` flexibly and quickly.
 
 Basic example:
 
