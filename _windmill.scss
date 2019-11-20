@@ -32,32 +32,47 @@ $wm-warning-title: '[Windmill warn]: ';
     $breakpoints: $wm-breakpoints,
     $disable: false
 ) {
-    @if $content != null {
-        $content: wm-shorthand-to-styles($content);
-        $content: wm-styles-to-string($content);
+    $is-shorthand-exception: false;
+    @if (wm-styles-is-shorthand($content)) and (not wm-vars-is-shorthand($vars)) {
+        @warn '#{$wm-warning-title}$vars argument is wrong, or only $content argument is shorthand.';
+        $is-shorthand-exception: true;
+    }
+    @if (not wm-styles-is-shorthand($content)) and (wm-vars-is-shorthand($vars)) {
+        @warn '#{$wm-warning-title}$content argument is wrong, or only $vars argument is shorthand.';
+        $is-shorthand-exception: true;
     }
 
-    @if $vars != null {
-        $vars: wm-shorthand-to-vars($vars);
+    $is-args-exception: false;
+    @if not $is-shorthand-exception {
+        @if (wm-styles-is-shorthand($content)) and (wm-vars-is-shorthand($vars)) {
+            $content: wm-convert-shorthand-to-styles($content);
+            $vars: wm-convert-shorthand-to-vars($vars);
+        }
+
+        @if $content != null {
+            $content: wm-styles-to-string($content);
+        }
+
+        @if $selector {
+            $selector: wm-list-to-text($selector, $separator: ', ');
+        } @else if & {
+            $selector: wm-list-to-text(&, $separator: ', ');
+        }
+
+        @if $breakpoints == true {
+            $breakpoints: $wm-breakpoints;
+        }
+
+        // If $selector contains no $wm-breakpoint-placeholder,
+        // sets false to $breakpoints.
+        @if $selector and (length(wm-selector-split-without-substr($selector, $wm-breakpoint-placeholder)) == wm-selector-get-group-number($selector)) {
+            $breakpoints: false;
+        }
+
+        $is-args-exception: not wm-verify-args($content, $vars, $remove, $selector, $breakpoints, $disable);
     }
 
-    @if $selector {
-        $selector: wm-list-to-text($selector, $separator: ', ');
-    } @else if & {
-        $selector: wm-list-to-text(&, $separator: ', ');
-    }
-
-    @if $breakpoints == true {
-        $breakpoints: $wm-breakpoints;
-    }
-    // If $selector contains no $wm-breakpoint-placeholder,
-    // sets false to $breakpoints.
-    @if $selector and (length(wm-selector-split-without-substr($selector, $wm-breakpoint-placeholder)) == wm-selector-get-group-number($selector)) {
-        $breakpoints: false;
-    }
-
-    $no-exception: wm-verify-args($content, $vars, $remove, $selector, $breakpoints, $disable);
-    @if $no-exception {
+    @if (not $is-shorthand-exception) and (not $is-args-exception) {
         // Removes specific the value-name from $vars.
         @if $remove {
             @each $var, $map in $vars {
@@ -82,67 +97,40 @@ $wm-warning-title: '[Windmill warn]: ';
             }
         }
 
-        @if not $breakpoints {
-            // Pattern 1:
-            // $breakpoints: falsy, $vars: falsy
-            @if not $vars {
-                @include wm-output-styles (
-                    $selector: $selector,
-                    $styles: if($content, wm-styles-remove-vars($content), null)
-                ) {
-                    @content;
-                }
-            }
+        // If the breakpoints is falsy,
+        // set the temporary breakpoints to execute Each-statement only once.
+        $breakpoints: if($breakpoints, $breakpoints, (all: 0));
 
-            // Pattern 2:
-            // $breakpoints: falsy, $vars: truthy
-            @if $vars {
-                @include wm-output-styles (
-                    $selector: wm-selector-combine($selector, $wm-value-placeholder, map-keys(wm-map-descend($vars))),
-                    $styles: if($content, wm-styles-remove-vars($content), null)
-                ) {
-                    @content;
-                }
-
-                @each $value-name in map-keys(wm-map-descend($vars)) {
+        @each $breakpoint-name, $breakpoint in $breakpoints {
+            @include wm-mq($breakpoint) {
+                @if not $vars {
                     @include wm-output-styles (
-                        $selector: wm-selector-build($selector, null, null, $value-name),
-                        $styles: wm-styles-build(wm-styles-remove-normal-values($content), wm-map-skip($vars, $value-name))
-                    );
+                        $selector: wm-selector-build($selector, $breakpoints, $breakpoint-name),
+                        $styles: if($content, wm-styles-get-normal-values($content), null)
+                    ) {
+                        @content;
+                    }
                 }
-            }
-        }
 
-        @if $breakpoints {
-            @each $breakpoint-name, $breakpoint in $breakpoints {
-                @include wm-mq($breakpoint) {
-                    // Pattern 3:
-                    // $breakpoints: truthy, $vars: falsy
-                    @if not $vars {
-                        @include wm-output-styles (
-                            $selector: wm-selector-build($selector, $breakpoints, $breakpoint-name),
-                            $styles: if($content, wm-styles-remove-vars($content), null)
-                        ) {
-                            @content;
-                        }
+                @if $vars {
+                    // Combines normal values and outputs them.
+                    @include wm-output-styles (
+                        $selector: wm-selector-build(wm-selector-combine($selector, $wm-value-placeholder, map-keys(wm-map-descend($vars))), $breakpoints, $breakpoint-name),
+                        $styles: if($content, wm-styles-get-normal-values($content), null)
+                    ) {
+                        @content;
                     }
 
-                    // Pattern 4:
-                    // $breakpoints: truthy, $vars: truthy
-                    @if $vars {
-                        @include wm-output-styles (
-                            $selector: wm-selector-build(wm-selector-combine($selector, $wm-value-placeholder, map-keys(wm-map-descend($vars))), $breakpoints, $breakpoint-name),
-                            $styles: if($content, wm-styles-remove-vars($content), null)
-                        ) {
-                            @content;
-                        }
+                    @each $value-name in map-keys(wm-map-descend($vars)) {
+                        $styles: wm-styles-remove-normal-values($content);
+                        $styles: wm-styles-fix-before-building($styles);
+                        $styles: wm-styles-build($styles, wm-map-skip($vars, $value-name));
+                        $styles: wm-styles-fix-after-building($styles);
 
-                        @each $value-name in map-keys(wm-map-descend($vars)) {
-                            @include wm-output-styles (
-                                $selector: wm-selector-build($selector, $breakpoints, $breakpoint-name, $value-name),
-                                $styles: wm-styles-build(wm-styles-remove-normal-values($content), wm-map-skip($vars, $value-name))
-                            );
-                        }
+                        @include wm-output-styles (
+                            $selector: wm-selector-build($selector, $breakpoints, $breakpoint-name, $value-name),
+                            $styles: $styles
+                        );
                     }
                 }
             }

@@ -344,18 +344,21 @@ Default settings (global variables):
 
 ## Shorthand
 
-If there is one property in `$content` and the value is only a variable, you can use shorthand.
+If there is only one variable, you can use shorthand.
 
 Before:
 
 ```scss
 .BR-foo-VAL {
     @include windmill(
-        $content: (display: [your-var-name]),
+        $content: (
+            margin: [your-var-name],
+            padding: [your-var-name]
+        ),
         $vars: (your-var-name: (
-            b: block,
-            n: none,
-            f: flex
+            1: 1rem,
+            2: 2rem,
+            3: 3rem
         ))
     );
 }
@@ -366,11 +369,11 @@ After:
 ```scss
 .BR-foo-VAL {
     @include windmill(
-        $content: display,
+        $content: margin padding,
         $vars: (
-            b: block,
-            n: none,
-            f: flex
+            1: 1rem,
+            2: 2rem,
+            3: 3rem
         )
     );
 }
@@ -380,27 +383,53 @@ If omit the argument name:
 
 ```scss
 .BR-foo-VAL {
-    @include windmill(display, (
-        b: block,
-        n: none,
-        f: flex
+    @include windmill(margin padding, (
+        1: 1rem,
+        2: 2rem,
+        3: 3rem
     ));
 }
 ```
 
-If add Important flag to the result of output:
+If add Important Flag to the result of output:
 
 ```scss
 .BR-foo-VAL {
-    @include windmill((display, true), (
-        b: block,
-        n: none,
-        f: flex
+    @include windmill(margin !important padding !important, (
+        1: 1rem,
+        2: 2rem,
+        3: 3rem
     ));
 }
 ```
 
 ## Changelog
+
+### Since version 1.1.2
+
+- Changed setting method of Important Frag on shorthand from (margin, true) to margin !important.
+
+Before:
+
+```scss
+.BR-foo-VAL {
+    @include windmill(
+        $content: (margin, true),
+        $vars: ...
+    );
+}
+```
+
+After:
+
+```scss
+.BR-foo-VAL {
+    @include windmill(
+        $content: margin !important,
+        $vars: ...
+    );
+}
+```
 
 ### Since version 1.1.0
 
