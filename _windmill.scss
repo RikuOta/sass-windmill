@@ -32,33 +32,47 @@ $wm-warning-title: '[Windmill warn]: ';
     $breakpoints: $wm-breakpoints,
     $disable: false
 ) {
-    @if $content != null {
-        $content: wm-shorthand-to-styles($content);
-        $content: wm-styles-to-string($content);
+    $is-shorthand-exception: false;
+    @if (wm-styles-is-shorthand($content)) and (not wm-vars-is-shorthand($vars)) {
+        @warn '#{$wm-warning-title}$vars argument is wrong, or only $content argument is shorthand.';
+        $is-shorthand-exception: true;
+    }
+    @if (not wm-styles-is-shorthand($content)) and (wm-vars-is-shorthand($vars)) {
+        @warn '#{$wm-warning-title}$content argument is wrong, or only $vars argument is shorthand.';
+        $is-shorthand-exception: true;
     }
 
-    @if $vars != null {
-        $vars: wm-shorthand-to-vars($vars);
+    $is-args-exception: false;
+    @if not $is-shorthand-exception {
+        @if (wm-styles-is-shorthand($content)) and (wm-vars-is-shorthand($vars)) {
+            $content: wm-convert-shorthand-to-styles($content);
+            $vars: wm-convert-shorthand-to-vars($vars);
+        }
+
+        @if $content != null {
+            $content: wm-styles-to-string($content);
+        }
+
+        @if $selector {
+            $selector: wm-list-to-text($selector, $separator: ', ');
+        } @else if & {
+            $selector: wm-list-to-text(&, $separator: ', ');
+        }
+
+        @if $breakpoints == true {
+            $breakpoints: $wm-breakpoints;
+        }
+
+        // If $selector contains no $wm-breakpoint-placeholder,
+        // sets false to $breakpoints.
+        @if $selector and (length(wm-selector-split-without-substr($selector, $wm-breakpoint-placeholder)) == wm-selector-get-group-number($selector)) {
+            $breakpoints: false;
+        }
+
+        $is-args-exception: not wm-verify-args($content, $vars, $remove, $selector, $breakpoints, $disable);
     }
 
-    @if $selector {
-        $selector: wm-list-to-text($selector, $separator: ', ');
-    } @else if & {
-        $selector: wm-list-to-text(&, $separator: ', ');
-    }
-
-    @if $breakpoints == true {
-        $breakpoints: $wm-breakpoints;
-    }
-
-    // If $selector contains no $wm-breakpoint-placeholder,
-    // sets false to $breakpoints.
-    @if $selector and (length(wm-selector-split-without-substr($selector, $wm-breakpoint-placeholder)) == wm-selector-get-group-number($selector)) {
-        $breakpoints: false;
-    }
-
-    $no-exception: wm-verify-args($content, $vars, $remove, $selector, $breakpoints, $disable);
-    @if $no-exception {
+    @if (not $is-shorthand-exception) and (not $is-args-exception) {
         // Removes specific the value-name from $vars.
         @if $remove {
             @each $var, $map in $vars {

@@ -241,6 +241,58 @@
     @return $shorthand;
 }
 
+@function wm-styles-is-shorthand($styles) {
+    @if (type-of($styles) == string) or (type-of($styles) == list) {
+        @return true;
+    }
+    @return false;
+}
+
+@function wm-vars-is-shorthand($vars) {
+    @if (type-of($vars) == map) and (wm-map-depth($vars) <= 1) {
+        @return true;
+    }
+    @return false;
+}
+
+@function wm-make-styles-shorthand-key($str) {
+    @return unquote(wm-str-trim(wm-str-remove($str, '!important')));
+}
+
+// wm-convert-shorthand-to-styles(margin);
+// => (margin: [val])
+// wm-convert-shorthand-to-styles(margin !important);
+// => (margin: [val] !important)
+@function wm-convert-shorthand-to-styles($shorthand) {
+    $type: type-of($shorthand);
+    @if ($type == string) and (wm-str-has($shorthand, '!important')) {
+        @return (wm-make-styles-shorthand-key($shorthand): [val] !important);
+    }
+    @if $type == string {
+        @return (unquote($shorthand): [val]);
+    }
+    @if ($type == list) and (length($shorthand) == 2) and (nth($shorthand, 2) == '!important') {
+        @return (wm-make-styles-shorthand-key(nth($shorthand, 1)): [val] !important);
+    }
+    @if $type == list {
+        $styles: ();
+        @each $prop in $shorthand {
+            @if (type-of($prop) == string) and ($prop == '!important') {
+                $styles: wm-map-set($styles, wm-map-last-key($styles), unquote(wm-map-last-val($styles) + ' !important'));
+            } @else if type-of($prop) == string {
+                $styles: wm-map-set($styles, $prop, [val]);
+            } @else if (type-of($prop) == list) and (length($prop) == 2) and (nth($prop, 2) == '!important') {
+                $styles: wm-map-set($styles, wm-make-styles-shorthand-key(nth($prop, 1)), [val] !important);
+            }
+        }
+        @return $styles;
+    }
+}
+
+@function wm-convert-shorthand-to-vars($shorthand) {
+    @return (val: $shorthand);
+}
+
 // ------------------------------
 // Core
 // ------------------------------

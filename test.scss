@@ -109,20 +109,60 @@ Omit the breakpoint-placeholder
 Use shorthand function
 ------------------------------ */
 
-.BR-test-VAL {
+.test-VAL {
     @include test-windmill(
-        $test-names: shorthand,
+        $test-names: (shorthand, shorthand1),
         $content: margin,
         $vars: $test-values
     );
 }
 
-/* with Important frag */
+/* with multiple property (list) */
 
-.BR-test-VAL {
+.test-VAL {
     @include test-windmill(
-        $test-names: shorthand,
-        $content: (margin, true),
+        $test-names: (shorthand, shorthand2),
+        $content: (margin, padding),
+        $vars: $test-values
+    );
+}
+
+/* with multiple property (no-brackets list) */
+
+.test-VAL {
+    @include test-windmill(
+        $test-names: (shorthand, shorthand3),
+        $content: margin padding,
+        $vars: $test-values
+    );
+}
+
+/* with Important frag (string) */
+
+.test-VAL {
+    @include test-windmill(
+        $test-names: (shorthand, shorthand4),
+        $content: 'margin !important',
+        $vars: $test-values
+    );
+}
+
+/* with Important frag (list) */
+
+.test-VAL {
+    @include test-windmill(
+        $test-names: (shorthand, shorthand5),
+        $content: (margin !important, padding),
+        $vars: $test-values
+    );
+}
+
+/* with Important frag (no-brackets list) */
+
+.test-VAL {
+    @include test-windmill(
+        $test-names: (shorthand, shorthand6),
+        $content: margin !important padding,
         $vars: $test-values
     );
 }

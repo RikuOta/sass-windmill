@@ -316,6 +316,16 @@
     @return nth(map-keys($map), $index);
 }
 
+// wm-map-last-key((key: 'value', key2: 'value2')); => "key2"
+@function wm-map-last-key($map) {
+    @return wm-list-last(map-keys($map));
+}
+
+// wm-map-last-val((key: 'value', key2: 'value2')); => "value2"
+@function wm-map-last-val($map) {
+    @return wm-list-last(map-values($map));
+}
+
 // wm-map-set((key: 'value'), 'key2', 'value2');
 // => (key: "value", key2: "value2")
 @function wm-map-set($map, $key, $value) {
