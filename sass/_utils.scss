@@ -1,0 +1,249 @@
+// ------------------------------
+// Generic
+// ------------------------------
+
+@function wm-to-string($val) {
+  @if (type-of($val) == map) or ($val == null) {
+    @return inspect($val);
+  }
+  @return $val + '';
+}
+
+@function wm-is-equal($val, $val2) {
+  @return $val == $val2;
+}
+
+@function wm-is-type-of($val, $expect-type) {
+  @if ($val == null) and ($expect-type == null) {
+    @return true;
+  }
+  @return type-of($val) == $expect-type;
+}
+
+@function wm-is-empty($val) {
+  @if $val == null {
+    @return true;
+  }
+  @if (type-of($val) == list) and (length($val) <= 0) {
+    @return true;
+  }
+  @if (type-of($val) == arglist) and (length($val) <= 0) {
+    @return true;
+  }
+  @if (type-of($val) == map) and (length(map-keys($val)) <= 0) {
+    @return true;
+  }
+  @if str-length(wm-to-string($val)) <= 0 {
+    @return true;
+  }
+  @return false;
+}
+
+@function wm-include($val, $val-to-find) {
+  @if type-of($val) == string {
+    @return str-index($val, $val-to-find) != null;
+  }
+  @if type-of($val) == list {
+    @return index($val, $val-to-find) != null;
+  }
+  @if type-of($val) == map {
+    @return wm-include(map-values($val), $val-to-find);
+  }
+  @return false;
+}
+
+// ------------------------------
+// String
+// ------------------------------
+
+@function wm-trim($str) {
+  @if str-slice($str, 1, 1) == ' ' {
+    $str: wm-trim(str-slice($str, 2));
+  }
+  @if str-slice($str, str-length($str)) == ' ' {
+    $str: wm-trim(str-slice($str, 1, str-length($str) - 1));
+  }
+  @return $str;
+}
+
+@function wm-str-replace($str, $substr, $new-substr: '', $search-start: 1) {
+  $substr-index: str-index(str-slice($str, $search-start), $substr);
+  $substr-index: if($substr-index, $substr-index + $search-start - 1, $substr-index);
+
+  @if not $substr-index {
+    @return $str;
+  }
+
+  $before: str-slice($str, 1, $substr-index - 1);
+  $after: str-slice($str, ($substr-index + str-length($substr)));
+  $str: $before + $new-substr + $after;
+
+  // update to disable infinite loop
+  // example: wm-str-replace(foo, foo, foo); // => infinite loop!
+  $search-start: str-length($before) + str-length($new-substr + '') + 1;
+
+  @return wm-str-replace($str, $substr, $new-substr, $search-start);
+}
+
+@function wm-str-last-index($str, $substr) {
+  @if not wm-include($str, $substr) {
+    @return null;
+  }
+  @return str-index($str, $substr) + str-length($substr) - 1;
+}
+
+@function wm-str-drop($str, $n: 1) {
+  @return str-slice($str, $n + 1);
+}
+
+@function wm-str-drop-right($str, $n: 1) {
+  @return str-slice($str, 1, str-length($str) - $n);
+}
+
+// Spread the range of `$substr` by `$str` and `$distance`
+//
+// wm-spread('bar', 'foo bar baz', 4);  => "bar baz"
+// wm-spread('bar', 'foo bar baz', -4); => "foo bar"
+@function wm-spread($substr, $str, $distance) {
+  @if not wm-include($str, $substr) {
+    @return $substr;
+  }
+
+  $substr-first-index: str-index($str, $substr);
+  $substr-last-index: wm-str-last-index($str, $substr);
+  @if $distance >= 1 {
+    $substr-last-index: $substr-last-index + $distance;
+  }
+  @if $distance <= -1 {
+    $substr-first-index: $substr-first-index + $distance;
+  }
+  @return str-slice($str, $substr-first-index, $substr-last-index);
+}
+
+// ------------------------------
+// List
+// ------------------------------
+
+@function wm-first($list) {
+  @return nth($list, 1);
+}
+
+@function wm-slice($list, $start, $end: length($list) + 1) {
+  $res: ();
+  @for $i from 1 through length($list) {
+    @if ($i >= $start) and ($i < $end) {
+      $res: append($res, nth($list, $i));
+    }
+  }
+  @return $res;
+}
+
+@function wm-join($list, $separator: '') {
+  $res: '';
+  @each $val in $list {
+    $res: $res + wm-to-string($val) + $separator;
+  }
+  $res: wm-str-drop-right($res, str-length($separator));
+  @return $res;
+}
+
+// Creates a list with all falsy values removed
+// false, null, 0, "" are falsy
+@function wm-compact($list) {
+  $res: ();
+  @each $val in $list {
+    @if $val and ($val != '') and ($val != 0) {
+      $res: append($res, $val);
+    }
+  }
+  @return $res;
+}
+
+@function wm-flatten-deep($list) {
+  $res: ();
+  @each $val in $list {
+    @if type-of($val) == list {
+      $res: join($res, wm-flatten-deep($val));
+    } @else {
+      $res: append($res, $val);
+    }
+  }
+  @return $res;
+}
+
+// ------------------------------
+// Number
+// ------------------------------
+
+@function wm-add-unit($num, $unit: px) {
+  @if unitless($num) {
+    @return $num + $unit;
+  } @else {
+    @return $num;
+  }
+}
+
+@function wm-remove-unit($num) {
+  @if (type-of($num) == number) and (not unitless($num)) {
+    @return $num / ($num * 0 + 1);
+  }
+  @return $num;
+}
+
+// ------------------------------
+// Collection
+// ------------------------------
+
+@function wm-map($list, $cb, $cb-args...) {
+  @for $i from 1 to length($list) + 1 {
+    $list: set-nth($list, $i, call(get-function($cb), nth($list, $i), $cb-args...));
+  }
+  @return $list;
+}
+
+@function wm-reduce($list, $cb) {
+  @if wm-is-empty($list) {
+    @return null;
+  }
+  $res: nth($list, 1);
+  @each $val in wm-slice($list, 2) {
+    $res: call(get-function($cb), $res, $val);
+  }
+  @return $res;
+}
+
+@function wm-filter($list, $cb, $cb-args...) {
+  $res: ();
+  @each $val in $list {
+    @if (call(get-function($cb), $val, $cb-args...)) {
+      $res: append($res, $val);
+    }
+  }
+  @return $res;
+}
+
+@function wm-some($list, $cb, $cb-args...) {
+  @each $val in $list {
+    @if (call(get-function($cb), $val, $cb-args...)) {
+      @return true;
+    }
+  }
+  @return false;
+}
+
+// ------------------------------
+// Generic (with dependencies)
+// ------------------------------
+
+@function wm-include-type($val, $type-to-find) {
+  @if type-of($val) == $type-to-find {
+    @return true;
+  }
+  @if (type-of($val) == list) and wm-some($val, wm-include-type, $type-to-find) {
+    @return true;
+  }
+  @if type-of($val) == map {
+    @return wm-include-type(map-values($val), $type-to-find);
+  }
+  @return false;
+}

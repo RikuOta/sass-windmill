@@ -1,0 +1,119 @@
+%wm-error {
+  z-index: 9999;
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  color: #f56c6c;
+  background-color: #fef0f0;
+  font-size: 12px;
+  white-space: pre;
+  padding: 8px 16px;
+  pointer-events: none;
+}
+
+@mixin wm-show-error() {
+  @at-root body:before {
+    @extend %wm-error;
+    content: '> ' + wm-join($wm-error-messages, '\A > ');
+  }
+}
+
+@mixin wm-warn($message, $selector: null) {
+  $wm-error-messages: append($wm-error-messages, $message) !global;
+
+  @if $wm-show-error {
+    @include wm-show-error;
+  }
+  @if $wm-error-to-css {
+    @at-root #{wm-to-string($selector)} {
+      content: "[Error]: #{$message}";
+    }
+  }
+  @if not $wm-error-to-css {
+    @warn $message;
+  }
+}
+
+// wm-remove-keys-including-map((1: 10px, 2: (map: map))); => (1: 10px)
+@function wm-remove-keys-including-map($map) {
+  @each $key, $val in $map {
+    @if wm-include-type($val, map) {
+      $map: map-remove($map, $key);
+    }
+  }
+  @return $map;
+}
+
+// wm-remove-keys-not-including-map((1: 10px, 2: (map: map))); => (2: (map: map))
+@function wm-remove-keys-not-including-map($map) {
+  @each $key, $val in $map {
+    @if not wm-include-type($val, map) {
+      $map: map-remove($map, $key);
+    }
+  }
+  @return $map;
+}
+
+// wm-style-val-to-str(0 auto);         => "0 auto"
+// wm-style-val-to-str(0 (1: 10px), 1); => "0 10px"
+@function wm-style-val-to-str($style-val, $key: null) {
+  @if $style-val == null {
+    @return null;
+  }
+  @if (type-of($style-val) != list) and (type-of($style-val) != map) {
+    @return $style-val + '';
+  }
+  @if type-of($style-val) == map {
+    @return wm-style-val-to-str(map-get($style-val, $key));
+  }
+  @if type-of($style-val) == list {
+    $res: wm-map($style-val, wm-style-val-to-str, $key);
+    $res: wm-compact($res);
+    $res: wm-join($res, ' ');
+    @return $res;
+  }
+}
+
+@function wm-resolve-placeholder($str, $breakpoint-name, $val-name, $is-min-breakpoint) {
+  @if $is-min-breakpoint and wm-include($str, $wm-breakpoint-placeholder) {
+    $breakpoint-placeholder: wm-spread($wm-breakpoint-placeholder, $str, $wm-min-breakpoint-addition);
+    $str: wm-str-replace($str, $breakpoint-placeholder, '');
+  }
+  @if $breakpoint-name {
+    $str: wm-str-replace($str, $wm-breakpoint-placeholder, $breakpoint-name);
+  }
+  @if $val-name {
+    $str: wm-str-replace($str, $wm-val-placeholder, $val-name);
+  }
+  @return $str;
+}
+
+// If there are wrong with style value, resolves it
+@function wm-fix-style-val($style-val) {
+  @if ($style-val == null) or (wm-trim($style-val) == '') or (wm-trim($style-val) == '!important') {
+    @return null;
+  }
+  @return wm-trim($style-val);
+}
+
+@mixin wm-output-declaration($prop, $val) {
+  $properties-requiring-quotes: (content);
+
+  @if wm-some($properties-requiring-quotes, wm-is-equal, $prop) {
+    #{$prop}: $val;
+  } @else {
+    #{$prop}: #{$val};
+  }
+}
+
+// Media Query mixin
+// If `$from` <= 0, outputs @content block to outside @media block
+@mixin wm-mq($from) {
+  @if wm-remove-unit($from) <= 0 {
+    @content;
+  } @else {
+    @media (min-width: wm-add-unit($from, px)) {
+      @content;
+    }
+  }
+}
