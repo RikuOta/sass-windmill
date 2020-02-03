@@ -1,0 +1,354 @@
+body:before {
+  z-index: 9999;
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  color: #f56c6c;
+  background-color: #fef0f0;
+  font-size: 12px;
+  white-space: pre;
+  padding: 8px 16px;
+  pointer-events: none;
+}
+
+/* # Module: windmill [mixin] */
+/* -------------------------- */
+/* Test: Do not pass the selector */
+/*   ASSERT:    */
+/*   OUTPUT   */
+body:before {
+  content: "> Something wrong with your selector";
+}
+
+null {
+  content: "[Error]: Something wrong with your selector";
+}
+
+/*   END_OUTPUT   */
+/*   CONTAINED   */
+/*   END_CONTAINED   */
+/*   END_ASSERT   */
+/*  */
+/* Test: Include `$wm-breakpoint-placeholder` in the selector, and do not set the breakpoints */
+/*   ASSERT:    */
+/*   OUTPUT   */
+body:before {
+  content: "> Something wrong with your selector\a> If you include `BR` in your selector, set the breakpoints. Target selector: `.test-BR`";
+}
+
+.test-BR {
+  content: "[Error]: If you include `BR` in your selector, set the breakpoints. Target selector: `.test-BR`";
+}
+
+/*   END_OUTPUT   */
+/*   CONTAINED   */
+/*   END_CONTAINED   */
+/*   END_ASSERT   */
+/*  */
+/* Test: Do not include `$wm-val-placeholder` in the selector, and include `map` in `$style` */
+/*   ASSERT:    */
+/*   OUTPUT   */
+body:before {
+  content: "> Something wrong with your selector\a> If you include `BR` in your selector, set the breakpoints. Target selector: `.test-BR`\a> If you include `map` in the value of `$style` argument, include `VAL` in your selector. Target selector: `.test`";
+}
+
+.test {
+  content: "[Error]: If you include `map` in the value of `$style` argument, include `VAL` in your selector. Target selector: `.test`";
+}
+
+/*   END_OUTPUT   */
+/*   CONTAINED   */
+/*   END_CONTAINED   */
+/*   END_ASSERT   */
+/*  */
+/* Test: Outputs CSS rules to each breakpoints */
+/*   ASSERT:    */
+/*   OUTPUT   */
+.test {
+  margin: 10px;
+}
+
+@media (min-width: 576px) {
+  .sm-test {
+    margin: 10px;
+  }
+}
+
+/*   END_OUTPUT   */
+/*   EXPECTED   */
+.test {
+  margin: 10px;
+}
+
+@media (min-width: 576px) {
+  .sm-test {
+    margin: 10px;
+  }
+}
+
+/*   END_EXPECTED   */
+/*   END_ASSERT   */
+/*  */
+/* Test: Outputs CSS rules based on normal declarations */
+/*   ASSERT:    */
+/*   OUTPUT   */
+.test {
+  margin: 10px;
+  padding: 10px;
+  display: block;
+}
+
+/*   END_OUTPUT   */
+/*   EXPECTED   */
+.test {
+  margin: 10px;
+  padding: 10px;
+  display: block;
+}
+
+/*   END_EXPECTED   */
+/*   END_ASSERT   */
+/*  */
+/* Test: Outputs CSS rules based on declarations including `map` */
+/*   ASSERT:    */
+/*   OUTPUT   */
+.test-1 {
+  margin: 10px;
+}
+
+.test-2 {
+  margin: 20px;
+  padding: 20px;
+}
+
+.test-3 {
+  padding: 30px;
+}
+
+.test-block {
+  display: block;
+}
+
+/*   END_OUTPUT   */
+/*   EXPECTED   */
+.test-1 {
+  margin: 10px;
+}
+
+.test-2 {
+  margin: 20px;
+  padding: 20px;
+}
+
+.test-3 {
+  padding: 30px;
+}
+
+.test-block {
+  display: block;
+}
+
+/*   END_EXPECTED   */
+/*   END_ASSERT   */
+/*  */
+/* Test:  - with normal value */
+/*   ASSERT:    */
+/*   OUTPUT   */
+.test-1 {
+  margin: 5px 10px auto;
+  padding: 5px auto;
+}
+
+.test-2 {
+  margin: 5px 20px auto;
+  padding: 5px 20px auto;
+}
+
+.test-3 {
+  margin: 5px auto;
+  padding: 5px 30px auto;
+}
+
+.test-block {
+  margin: 5px auto;
+  padding: 5px auto;
+  display: block;
+}
+
+/*   END_OUTPUT   */
+/*   EXPECTED   */
+.test-1 {
+  margin: 5px 10px auto;
+  padding: 5px auto;
+}
+
+.test-2 {
+  margin: 5px 20px auto;
+  padding: 5px 20px auto;
+}
+
+.test-3 {
+  margin: 5px auto;
+  padding: 5px 30px auto;
+}
+
+.test-block {
+  margin: 5px auto;
+  padding: 5px auto;
+  display: block;
+}
+
+/*   END_EXPECTED   */
+/*   END_ASSERT   */
+/*  */
+/* Test:  - with normal declarations */
+/*   ASSERT:    */
+/*   OUTPUT   */
+.test-1, .test-2 {
+  padding: 10px;
+  display: block;
+}
+
+.test-1 {
+  margin: 10px;
+}
+
+.test-2 {
+  margin: 20px;
+}
+
+/*   END_OUTPUT   */
+/*   EXPECTED   */
+.test-1, .test-2 {
+  padding: 10px;
+  display: block;
+}
+
+.test-1 {
+  margin: 10px;
+}
+
+.test-2 {
+  margin: 20px;
+}
+
+/*   END_EXPECTED   */
+/*   END_ASSERT   */
+/*  */
+/* Test:  - with Important frag */
+/*   ASSERT:    */
+/*   OUTPUT   */
+.test-1 {
+  margin: 10px !important;
+  padding: 10px auto !important;
+}
+
+.test-block {
+  padding: auto !important;
+  display: block !important;
+}
+
+/*   END_OUTPUT   */
+/*   EXPECTED   */
+.test-1 {
+  margin: 10px !important;
+  padding: 10px auto !important;
+}
+
+.test-block {
+  padding: auto !important;
+  display: block !important;
+}
+
+/*   END_EXPECTED   */
+/*   END_ASSERT   */
+/*  */
+/* Test:  - with various values */
+/*   ASSERT:    */
+/*   OUTPUT   */
+.test-num {
+  margin: 10px;
+}
+
+.test-single {
+  margin: 10px;
+}
+
+.test-double {
+  margin: 10px;
+}
+
+.test-nNum {
+  margin: -10px;
+}
+
+.test-nSingle {
+  margin: -10px;
+}
+
+.test-nDouble {
+  margin: -10px;
+}
+
+.test-multiple {
+  margin: 10px auto -10px auto;
+}
+
+.test-important {
+  margin: 10px !important;
+}
+
+.test-content-single {
+  content: "test";
+}
+
+.test-content-double {
+  content: "test";
+}
+
+/*   END_OUTPUT   */
+/*   EXPECTED   */
+.test-num {
+  margin: 10px;
+}
+
+.test-single {
+  margin: 10px;
+}
+
+.test-double {
+  margin: 10px;
+}
+
+.test-nNum {
+  margin: -10px;
+}
+
+.test-nSingle {
+  margin: -10px;
+}
+
+.test-nDouble {
+  margin: -10px;
+}
+
+.test-multiple {
+  margin: 10px auto -10px auto;
+}
+
+.test-important {
+  margin: 10px !important;
+}
+
+.test-content-single {
+  content: "test";
+}
+
+.test-content-double {
+  content: "test";
+}
+
+/*   END_EXPECTED   */
+/*   END_ASSERT   */
+/*  */
+/*  */

@@ -1,0 +1,290 @@
+@import '../node_modules/sass-true/sass/true';
+@import '../sass/windmill';
+
+// Override default settings
+$wm-breakpoints: (
+  all: 0px,
+  sm: 576px
+);
+$wm-breakpoint-placeholder: 'BR';
+$wm-value-placeholder: 'VAL';
+$wm-min-breakpoint-addition: 1;
+$wm-error-to-css: true;
+$wm-show-error: true;
+
+@include describe('windmill [mixin]') {
+  @include it('Do not pass the selector') {
+    @include assert() {
+      @include output($selector: false) {
+        @include windmill() {
+          display: block;
+        }
+      }
+
+      @include contains($selector: false) {
+        null {
+        }
+      }
+    }
+  }
+
+  @include it('Include `$wm-breakpoint-placeholder` in the selector, and do not set the breakpoints') {
+    @include assert() {
+      @include output($selector: false) {
+        .test-BR {
+          @include windmill($breakpoints: null) {
+            display: block;
+          }
+        }
+      }
+
+      @include contains($selector: false) {
+        .test-BR {
+        }
+      }
+    }
+  }
+
+  @include it('Do not include `$wm-val-placeholder` in the selector, and include `map` in `$style`') {
+    @include assert() {
+      @include output($selector: false) {
+        .test {
+          @include windmill((margin: (1: 10px, 2: 20px)));
+        }
+      }
+
+      @include contains($selector: false) {
+        .test {
+        }
+      }
+    }
+  }
+
+  @include it('Outputs CSS rules to each breakpoints') {
+    @include assert() {
+      @include output($selector: false) {
+        .BR-test {
+          @include windmill() {
+            margin: 10px;
+          }
+        }
+      }
+
+      @include expect($selector: false) {
+        .test {
+          margin: 10px;
+        }
+        @media (min-width: 576px) {
+          .sm-test {
+            margin: 10px;
+          }
+        }
+      }
+    }
+  }
+
+  @include it('Outputs CSS rules based on normal declarations') {
+    @include assert() {
+      @include output($selector: false) {
+        .test {
+          @include windmill((
+            margin: 10px,
+            padding: 10px
+          )) {
+            display: block;
+          }
+        }
+      }
+
+      @include expect($selector: false) {
+        .test {
+          margin: 10px;
+          padding: 10px;
+          display: block;
+        }
+      }
+    }
+  }
+
+  @include it('Outputs CSS rules based on declarations including `map`') {
+    @include assert() {
+      @include output($selector: false) {
+        .test-VAL {
+          @include windmill((
+            margin: (1: 10px, 2: 20px),
+            padding: (2: 20px, 3: 30px),
+            display: (block: block)
+          ));
+        }
+      }
+
+      @include expect($selector: false) {
+        .test-1 {
+          margin: 10px;
+        }
+        .test-2 {
+          margin: 20px;
+          padding: 20px;
+        }
+        .test-3 {
+          padding: 30px;
+        }
+        .test-block {
+          display: block;
+        }
+      }
+    }
+  }
+
+  @include it(' - with normal value') {
+    @include assert() {
+      @include output($selector: false) {
+        .test-VAL {
+          @include windmill((
+            margin: 5px (1: 10px, 2: 20px) auto,
+            padding: 5px (2: 20px, 3: 30px) auto,
+            display: (block: block)
+          ));
+        }
+      }
+
+      @include expect($selector: false) {
+        .test-1 {
+          margin: 5px 10px auto;
+          padding: 5px auto;
+        }
+        .test-2 {
+          margin: 5px 20px auto;
+          padding: 5px 20px auto;
+        }
+        .test-3 {
+          margin: 5px auto;
+          padding: 5px 30px auto;
+        }
+        .test-block {
+          margin: 5px auto;
+          padding: 5px auto;
+          display: block;
+        }
+      }
+    }
+  }
+
+  @include it(' - with normal declarations') {
+    @include assert() {
+      @include output($selector: false) {
+        .test-VAL {
+          @include windmill((
+            margin: (1: 10px, 2: 20px),
+            padding: 10px
+          )) {
+            display: block;
+          }
+        }
+      }
+
+      @include expect($selector: false) {
+        .test-1, .test-2 {
+          padding: 10px;
+          display: block;
+        }
+        .test-1 {
+          margin: 10px;
+        }
+        .test-2 {
+          margin: 20px;
+        }
+      }
+    }
+  }
+
+  @include it(' - with Important frag') {
+    @include assert() {
+      @include output($selector: false) {
+        .test-VAL {
+          @include windmill((
+            margin: (1: 10px) !important,
+            padding: (1: 10px) auto !important,
+            display: (block: block !important)
+          ));
+        }
+      }
+
+      @include expect($selector: false) {
+        .test-1 {
+          margin: 10px !important;
+          padding: 10px auto !important;
+        }
+        .test-block {
+          padding: auto !important;
+          display: block !important;
+        }
+      }
+    }
+  }
+
+  @include it(' - with various values') {
+    @include assert() {
+      @include output($selector: false) {
+        .test-VAL {
+          @include windmill((
+            margin: (
+              num: 10px,
+              single: '10px',
+              double: "10px",
+              nNum: -10px,
+              nSingle: '-10px',
+              nDouble: "-10px",
+              multiple: 10px auto -10px auto,
+              important: 10px !important,
+              null: null,
+              empty: ''
+            )
+          ));
+        }
+
+        .test-VAL {
+          @include windmill((
+            content: (
+              content-single: 'test',
+              content-double: "test"
+            )
+          ))
+        }
+      }
+
+      @include expect($selector: false) {
+        .test-num {
+          margin: 10px
+        }
+        .test-single {
+          margin: 10px;
+        }
+        .test-double {
+          margin: 10px;
+        }
+        .test-nNum {
+          margin: -10px;
+        }
+        .test-nSingle {
+          margin: -10px;
+        }
+        .test-nDouble {
+          margin: -10px;
+        }
+        .test-multiple {
+          margin: 10px auto -10px auto;
+        }
+        .test-important {
+          margin: 10px !important;
+        }
+        .test-content-single {
+          content: "test"
+        }
+        .test-content-double {
+          content: "test"
+        }
+      }
+    }
+  }
+}
