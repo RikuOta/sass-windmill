@@ -1,122 +1,154 @@
 # Sass Windmill [![Build Status](https://travis-ci.org/RikuOta/sass-windmill.svg?branch=master)](https://travis-ci.org/RikuOta/sass-windmill) <img alt="MIT licensed" src="https://img.shields.io/github/license/RikuOta/sass-windmill?color=blue">
 
-A [Sass](https://sass-lang.com/) mixin that helps you define utility classes like `.mb-10px` flexibly and quickly.
+A [Sass](https://sass-lang.com/) mixin that helps you define utility classes such as `.mb-10px` flexibly and quickly.
 
-Basic example:
+Example:
 
 ```scss
 @import 'windmill';
 
 $wm-breakpoints: (
-    all: 0,
-    sm:  576px,
-    md:  768px
+  all: 0,
+  sm: 576px
 );
 
-$spaces: (
-    1: 1rem,
-    2: 2rem,
-    3: 3rem
+$grid-columns: (
+  4: 33%,
+  8: 66%,
+  12: 100% 
 );
 
-.BR-mb-VAL {
-    @include windmill(margin-bottom, $spaces);
+.BR-col-VAL {
+  @include windmill((
+    flex: 0 0 $grid-columns,
+    max-width: $grid-columns
+  )) {
+    min-width: 0;
+    word-break: break-word;
+  }
 }
 ```
 
 Compiles to:
 
 ```css
-.mb-1 {
-  margin-bottom: 1rem;
+.col-4, .col-8, .col-12 {
+  min-width: 0;
+  word-break: break-word;
 }
-.mb-2 {
-  margin-bottom: 2rem;
+.col-4 {
+  flex: 0 0 33%;
+  max-width: 33%;
 }
-.mb-3 {
-  margin-bottom: 3rem;
+.col-8 {
+  flex: 0 0 66%;
+  max-width: 66%;
+}
+.col-12 {
+  flex: 0 0 100%;
+  max-width: 100%;
 }
 
 @media (min-width: 576px) {
-  .sm-mb-1 {
-    margin-bottom: 1rem;
+  .sm-col-4, .sm-col-8, .sm-col-12 {
+    min-width: 0;
+    word-break: break-word;
   }
-  .sm-mb-2 {
-    margin-bottom: 2rem;
+  .sm-col-4 {
+    flex: 0 0 33%;
+    max-width: 33%;
   }
-  .sm-mb-3 {
-    margin-bottom: 3rem;
+  .sm-col-8 {
+    flex: 0 0 66%;
+    max-width: 66%;
   }
-}
-
-@media (min-width: 768px) {
-  .md-mb-1 {
-    margin-bottom: 1rem;
-  }
-  .md-mb-2 {
-    margin-bottom: 2rem;
-  }
-  .md-mb-3 {
-    margin-bottom: 3rem;
+  .sm-col-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
   }
 }
 ```
 
 ## Table of Contents
 
-- [Try immediately](#try-immediately)
+- [How to get started](#how-to-get-started)
 - [Usage](#usage)
-- [Customize](#customize)
-- [Arguments](#arguments)
-- [Changelog](#changelog)
+- [Parameters](#parameters)
+- [Running tests](#running-tests)
 - [License](#license)
 
-## Try immediately
+## How to get started
 
-[You can try immediately on CodePen.](https://codepen.io/RikuOta/pen/qBWzpwW)
+[Immediately play with it on CodePen.](https://codepen.io/RikuOta/pen/qBWzpwW)
+
+OR:
+
+1. Install:
+
+    * with [npm](https://www.npmjs.com/): `npm i sass-windmill`
+    * with [yarn](https://yarnpkg.com/): `yarn add sass-windmill`
+
+1. Import the partial in your Sass files:
+
+    ```scss
+    @import 'node_modules/sass-windmill/sass/windmill';
+    ```
+
+1. Override default settings with your own preferences.  
+    Default settings:
+
+    ```scss
+    // A map of (name: screen width),
+    // if screen width <= 0, outputs CSS rules outside @media blocks
+    $wm-breakpoints: (
+      all: 0,
+      sm: 576px,
+      md: 768px,
+      lg: 992px,
+      xl: 1200px
+    ) !default;
+
+    // Placeholder to include in the selector,
+    // replaced by the breakpoint name
+    $wm-breakpoint-placeholder: 'BR' !default;
+
+    // Placeholder to include in the selector,
+    // replaced by the value name
+    $wm-val-placeholder: 'VAL' !default;
+
+    // For minimum screen width, the number of strings to be removed
+    // from the selector with `$wm-breakpoint-placeholder`
+    //  0: .foo-BR-bar => .foo--bar
+    //  1: .foo-BR-bar => .foo-bar
+    // -1: .foo-BR-bar => .foo-bar
+    $wm-min-breakpoint-addition: 1 !default;
+
+    // If you want output error messages in CSS files
+    // instead of the terminal, set `true`
+    $wm-error-to-css: false !default;
+
+    // If you want to display error messages in the your site
+    // instead of the terminal, set `true`
+    $wm-show-error: false !default;
+    ```
+
+1. Call `windmill()` (see below)
 
 ## Usage
 
-Install with [npm](https://www.npmjs.com/):
-
-```
-npm i sass-windmill
-```
-
-or [download sass-windmill from the repository](https://github.com/RikuOta/sass-windmill) into your Sass project.  
-The target is 3 files:
-
-```text
-sass-windmill/
-    ├── _windmill.scss
-    ├── _windmill-utils.scss
-    └── _windmill-lib.scss
-```
-
-Import the partial in your Sass files and call `windmill()` with the selector:
-
-```scss
-@import 'windmill';
-
-.foo {
-    @include windmill() { ... }
-}
-```
-
-`windmill()` has 2 functions.  
-1\. Outputs styles to each breakpoints:
+`$wm-breakpoints` is a map of (name: screen width).  
+If you set the breakpoints, `windmill` replaces `BR` placeholder in the selector with key names and outputs CSS rules to each breakpoints:
 
 ```scss
 $wm-breakpoints: (
-    all: 0,
-    sm:  576px,
-    md:  768px
+  all: 0,
+  sm: 576px
 );
 
 .BR-foo {
-    @include windmill() {
-        margin: 0;
-    }
+  @include windmill() {
+    display: block;
+  }
 }
 ```
 
@@ -124,32 +156,24 @@ Compiles to:
 
 ```css
 .foo {
-  margin: 0;
+  display: block;
 }
 
 @media (min-width: 576px) {
   .sm-foo {
-    margin: 0;
-  }
-}
-
-@media (min-width: 768px) {
-  .md-foo {
-    margin: 0;
+    display: block;
   }
 }
 ```
 
-`windmill()` replaces the `BR` string with a breakpoint name, outputs styles to each breakpoints.
-
-2\. Outputs multiple values:
+`$style` parameter of `windmill($style, $selector, $breakpoints)` is general CSS declarations block. The only difference is that the value accepts `map` such as `margin: (1: 10px, 2: 20px)`.  
+If `map` is included, `windmill()` replaces `VAL` placeholder in the selector with key names, embeds the value in `$style`, and outputs CSS rules:
 
 ```scss
 .foo-VAL {
-    @include windmill(
-        margin,
-        (1: 1rem, 2: 2rem, 3: 3rem)
-    );
+  @include windmill((
+    margin: 0 (1: 10px, 2: 20px) auto
+  ));
 }
 ```
 
@@ -157,296 +181,63 @@ Compiles to:
 
 ```css
 .foo-1 {
-  margin: 1rem;
+  margin: 0 10px auto;
 }
 .foo-2 {
-  margin: 2rem;
-}
-.foo-3 {
-  margin: 3rem;
+  margin: 0 20px auto;
 }
 ```
 
-`windmill()` replaces the `VAL` string with a value name, outputs multiple values.
+## Parameters
 
-If use 2 functions together:
+`windmill()` takes up 3 parameters:
 
-```scss
-$wm-breakpoints: (
-    all: 0,
-    sm:  576px,
-    md:  768px
-);
+1. `$style`: general CSS declarations block
 
-.BR-foo-VAL {
-    @include windmill(
-        margin,
-        (1: 1rem, 2: 2rem, 3: 3rem)
-    )
-}
-```
+1. `$selector`: the selector to use instead of `.foo { @include ... }`
 
-Compiles to:
-
-```css
-.foo-1 {
-  margin: 1rem;
-}
-.foo-2 {
-  margin: 2rem;
-}
-.foo-3 {
-  margin: 3rem;
-}
-
-@media (min-width: 576px) {
-  .sm-foo-1 {
-    margin: 1rem;
-  }
-  .sm-foo-2 {
-    margin: 2rem;
-  }
-  .sm-foo-3 {
-    margin: 3rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .md-foo-1 {
-    margin: 1rem;
-  }
-  .md-foo-2 {
-    margin: 2rem;
-  }
-  .md-foo-3 {
-    margin: 3rem;
-  }
-}
-```
-
-### Case 1/4: Output multiple properties
-
-```scss
-.foo-VAL {
-    @include windmill(
-        margin padding,
-        (1: 1rem, 2: 2rem, 3: 3rem)
-    )
-}
-```
-
-Compiles to:
-
-```css
-.foo-1 {
-  margin: 1rem;
-  padding: 1rem;
-}
-.foo-2 {
-  margin: 2rem;
-  padding: 2rem;
-}
-.foo-3 {
-  margin: 3rem;
-  padding: 3rem;
-}
-```
-
-### Case 2/4: Add Important Flag to the result of output
-
-```scss
-.foo-VAL {
-    @include windmill(
-        margin!important,
-        (1: 1rem, 2: 2rem, 3: 3rem)
-    )
-}
-
-// If there are multiple properties:
-
-.foo-VAL {
-    @include windmill(
-        margin!important padding!important,
-        (1: 1rem, 2: 2rem, 3: 3rem)
-    )
-}
-```
-
-### Case 3/4: Output complex values
-
-```scss
-.foo-VAL {
-    @include windmill(
-        (margin: 0 [any-name]),
-        (any-name: (1: 1rem, 2: 2rem, 3: 3rem))
-    )
-}
-```
-
-Compiles to:
-
-```css
-.foo-1 {
-  margin: 0 1rem;
-}
-.foo-2 {
-  margin: 0 2rem;
-}
-.foo-3 {
-  margin: 0 3rem;
-}
-```
-
-### Case 4/4: Output complex values and normal values together
-
-```scss
-.foo-VAL {
-    @include windmill(
-        (
-            margin: 0 [any-name], // complex value
-            width: 10rem // normal value
-        ), 
-        (
-            any-name: (1: 1rem, 2: 2rem, 3: 3rem)
-        )
-    ) {
-        height: 10rem // normal value
+    ```scss
+    @include windmill($selector: '.BR-foo') {
+      display: block;
     }
-}
-```
+    ```
 
-Compiles to:
+1. `$breakpoints`: the breakpoints to use instead of `$wm-breakpoints`
 
-```css
-.foo-1, .foo-2, .foo-3 {
-  width: 10rem;
-  height: 10rem;
-}
-.foo-1 {
-  margin: 0 1rem;
-}
-.foo-2 {
-  margin: 0 2rem;
-}
-.foo-3 {
-  margin: 0 3rem;
-}
-```
-
-## Customize
-
-You can override global variables and change the default settings with your own settings after `@import 'windmill'`:
-
-```scss
-@import 'windmill';
-
-$wm-breakpoints: (all: 0px, sm: 576px, md: 768px, lg: 992px, xl: 1200px);
-$wm-breakpoint-placeholder: BR;
-...
-```
-
-Default settings (global variables):
-
-|Variable|Type|Default|Description|
-|:---|:---|:---|:---|
-|$wm-breakpoints|`map`|`(all: 0px, sm: 576px, md: 768px, lg: 992px, xl: 1200px)`|A map of `(name: minimum width)`.|
-|$wm-breakpoint-placeholder|`string`|`BR`|The string you include in the selector. Is replaced with the breakpoint name.|
-|$wm-value-placeholder|`string`|`VAL`|The string you include in the selector. Is replaced with the value name.|
-|$wm-min-breakpoint-prefix|`boolean`|`false`|If you want to add a breakpoint name to the selector on the minimum screen width, set true.|
-|$wm-min-breakpoint-addition|`number`|`1`|When `$wm-min-breakpoint-prefix` is false, the number of strings to be removed from the selector together.|
-
-## Arguments
-
-`windmill()` accepts the following arguments:
-
-```scss
-@include windmill(
-    $content, $vars, $remove, $selector, $breakpoints, $disable
-);
-```
-
-|Argument|Type|Default|Description|
-|:---|:---|:---|:---|
-|$content|`string` `list` `map`|`null`|string: `property-name`.<br>list: `(property-name, property-name, property-name, ...)`.<br>map: `(property-name: value)`.|
-|$vars|`map`|`null`|1: `(value-name: value)`<br>2: `(variable-name: (value-name: value))`.|
-|$remove|`list`|`null`|A list of `(value-name, value-name, value-name, ...)`, you can remove specific `value-name` from `$vars`.|
-|$selector|`string`|`null`|You can use instead of calling `windmill()` with the selector.|
-|$breakpoints|`map`|`$wm-breakpoints`|Instead of `$wm-breakpoints`, you can set the breakpoints that is used on only one output.|
-|$disable|`boolean`|`false`|If set true, outputs no styles.|
-
-### Examples
-
-#### $remove
-
-```scss
-.foo-VAL {
-    @include windmill(
-        $content: margin,
-        $vars: (
-            1: 1rem, // will be removed
-            2: 2rem, 
-            3: 3rem  // will be removed
-        ),
-        $remove: 1 3
+    ```scss
+    $wm-breakpoints: (
+      all: 0,
+      sm: 576px
     );
-}
-```
 
-## Changelog
+    .BR-foo {
+      @include windmill($breakpoints: (
+        all: 0, 
+        sm: 600px
+      )) {
+        display: block;
+      }
+    }
+    ```
 
-### Since version 1.1.2
+    Compiles to:
 
-- Changed setting method of Important Frag on shorthand from (margin, true) to margin !important.
+    ```css
+    .foo {
+      display: block;
+    }
 
-Before:
+    @media (min-width: 600px) {
+      .sm-foo {
+        display: block;
+      }
+    }
+    ```
 
-```scss
-.BR-foo-VAL {
-    @include windmill(
-        $content: (margin, true),
-        $vars: ...
-    );
-}
-```
+## Running tests
 
-After:
-
-```scss
-.BR-foo-VAL {
-    @include windmill(
-        $content: margin !important,
-        $vars: ...
-    );
-}
-```
-
-### Since version 1.1.0
-
-- Changed default value of `$wm-breakpoint-placeholder` global variable from `SCR` to `BR`.
-- Changed argument name from `$declarations` to `$content`.
-- Changed argument name from `$values` to `$vars`.
-- Changed how to set variables.
-
-Before:
-
-```scss
-.SCR-test-VAL {
-    @include windmill(
-        $declarations: (margin: '$your-var-name$'),
-        $values: ('$your-var-name$': ...)
-    );
-}
-```
-
-After:
-
-```scss
-.BR-test-VAL {
-    @include windmill(
-        $content: (margin: [your-var-name]),
-        $vars: (your-var-name: ...)
-    );
-}
+```sh
+npm test
 ```
 
 ## License

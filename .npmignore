@@ -1,8 +1,6 @@
 .DS_Store
 .idea
-node_modules
 .sass-cache
-*.css.map
-test.css
-test.scss
 .travis.yml
+node_modules
+test

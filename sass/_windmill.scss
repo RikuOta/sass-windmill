@@ -1,0 +1,150 @@
+@import 'utils';
+@import 'lib';
+
+// ------------------------------
+// Default settings
+// ------------------------------
+
+// A map of (name: screen width),
+// if screen width <= 0, outputs CSS rules outside @media blocks
+$wm-breakpoints: (
+  all: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px
+) !default;
+
+// Placeholder to include in the selector,
+// replaced by the breakpoint name
+$wm-breakpoint-placeholder: 'BR' !default;
+
+// Placeholder to include in the selector,
+// replaced by the value name
+$wm-val-placeholder: 'VAL' !default;
+
+// For minimum screen width, the number of strings to be removed
+// from the selector with `$wm-breakpoint-placeholder`
+//  0: .foo-BR-bar => .foo--bar
+//  1: .foo-BR-bar => .foo-bar
+// -1: .foo-BR-bar => .foo-bar
+$wm-min-breakpoint-addition: 1 !default;
+
+// If you want output error messages in CSS files
+// instead of the terminal, set `true`
+$wm-error-to-css: false !default;
+
+// If you want to display error messages in the your site
+// instead of the terminal, set `true`
+$wm-show-error: false !default;
+
+// ------------------------------
+// Main mixin
+// ------------------------------
+
+$wm-error-messages: () !default;
+
+@mixin windmill(
+  $style: (),
+  $selector: null,
+  $breakpoints: $wm-breakpoints
+) {
+  // Set to false when exception is thrown, disable output
+  $is-output: true;
+
+  // Resolve type of `$style`
+  @if type-of($style) != map {
+    $style: ();
+  }
+
+  // Throw if `$selector` doesn't exists
+  @if (& == null) and (not $selector or ($selector == '')) {
+    @include wm-warn('Something wrong with your selector', $selector);
+    $is-output: false;
+  }
+
+  // Cast the selector to string
+  @if not $selector or ($selector == '') {
+    $selector: wm-to-string(wm-flatten-deep(&));
+  } @else {
+    $selector: wm-to-string($selector);
+  }
+
+  // Resolve type of `$breakpoints`
+  @if type-of($breakpoints) != map {
+    $breakpoints: ();
+  }
+
+  // Throw if `$selector` includes `$wm-breakpoint-placeholder`,
+  // but breakpoints is empty
+  @if $is-output and wm-include($selector, $wm-breakpoint-placeholder) and wm-is-empty($breakpoints) {
+    @include wm-warn('If you include `#{$wm-breakpoint-placeholder}` in your selector, set the breakpoints. Target selector: `#{$selector}`', $selector);
+    $is-output: false;
+  }
+
+  // Throw if `$selector` doesn't include `$wm-val-placeholder`,
+  // but the value of `$style` includes `map`
+  $style-values: wm-flatten-deep(map-values($style));
+  @if $is-output and not wm-include($selector, $wm-val-placeholder) and wm-include-type($style-values, map) {
+    @include wm-warn('If you include `map` in the value of `$style` argument, include `#{$wm-val-placeholder}` in your selector. Target selector: `#{$selector}`', $selector);
+    $is-output: false;
+  }
+
+  // If `$selector` doesn't contain `$wm-breakpoint-placeholder`,
+  // empty `$breakpoints` and disable output to @media blocks
+  @if not wm-include($selector, $wm-breakpoint-placeholder) {
+    $breakpoints: ();
+  }
+
+  // If `$breakpoints` is empty,
+  // set the temporary breakpoints to execute Each-statement only once
+  @if wm-is-empty($breakpoints) {
+    $breakpoints: (null: 0);
+  }
+
+  // Outputs CSS rule
+  @if $is-output {
+    @at-root {
+      @each $breakpoint-name, $breakpoint in $breakpoints {
+        @include wm-mq($breakpoint) {
+          $breakpoint-values: map-values($breakpoints);
+          $is-min-breakpoint: $breakpoint == min($breakpoint-values...);
+
+          $style-values: wm-flatten-deep(map-values($style));
+          $style-val-names: null;
+          @if wm-include-type($style-values, map) {
+            $style-val-names: wm-filter($style-values, wm-is-type-of, map);
+            $style-val-names: wm-reduce($style-val-names, map-merge);
+            $style-val-names: map-keys($style-val-names);
+          }
+
+          // Groups selectors,
+          // outputs CSS rule based on normal declarations and @content block
+          $selectors: ();
+          @each $style-val-name in $style-val-names {
+            $selectors: append($selectors, wm-resolve-placeholder($selector, $breakpoint-name, $style-val-name, $is-min-breakpoint));
+          }
+          #{wm-join($selectors, ', ')} {
+            @each $prop, $val in wm-remove-keys-including-map($style) {
+              $output-val: wm-style-val-to-str($val);
+              $output-val: wm-fix-style-val($output-val);
+              @include wm-output-declaration($prop, $output-val);
+            }
+            @content;
+          }
+
+          // Outputs CSS rule based on declarations including `map`
+          @each $style-val-name in $style-val-names {
+            #{wm-resolve-placeholder($selector, $breakpoint-name, $style-val-name, $is-min-breakpoint)} {
+              @each $prop, $val in wm-remove-keys-not-including-map($style) {
+                $output-val: wm-style-val-to-str($val, $style-val-name);
+                $output-val: wm-fix-style-val($output-val);
+                @include wm-output-declaration($prop, $output-val);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
