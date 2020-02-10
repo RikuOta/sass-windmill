@@ -172,7 +172,7 @@
 // Number
 // ------------------------------
 
-@function wm-add-unit($num, $unit: px) {
+@function wm-set-unit($num, $unit: px) {
   @if unitless($num) {
     @return $num + $unit;
   } @else {

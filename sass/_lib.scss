@@ -126,7 +126,7 @@
   @if wm-remove-unit($from) <= 0 {
     @content;
   } @else {
-    @media (min-width: wm-add-unit($from, px)) {
+    @media (min-width: wm-set-unit($from, px)) {
       @content;
     }
   }
