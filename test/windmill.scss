@@ -60,6 +60,56 @@ $wm-show-error: true;
     }
   }
 
+  @include it('Call with group of selectors') {
+    @include assert() {
+      @include output($selector: false) {
+        .test1, .test2 {
+          @include windmill() {
+            margin: 10px;
+          }
+        }
+      }
+
+      @include expect($selector: false) {
+        .test1, .test2 {
+          margin: 10px;
+        }
+      }
+    }
+  }
+
+  @include it('Pass a string to `$selector`') {
+    @include assert() {
+      @include output($selector: false) {
+        @include windmill($selector: ('.test1, .test2')) {
+          margin: 10px;
+        }
+      }
+
+      @include expect($selector: false) {
+        .test1, .test2 {
+          margin: 10px;
+        }
+      }
+    }
+  }
+
+  @include it('Pass a list to `$selector`') {
+    @include assert() {
+      @include output($selector: false) {
+        @include windmill($selector: ('.test1', '.test2')) {
+          margin: 10px;
+        }
+      }
+
+      @include expect($selector: false) {
+        .test1, .test2 {
+          margin: 10px;
+        }
+      }
+    }
+  }
+
   @include it('Outputs CSS rules to each breakpoints') {
     @include assert() {
       @include output($selector: false) {
