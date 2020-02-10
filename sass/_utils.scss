@@ -3,10 +3,7 @@
 // ------------------------------
 
 @function wm-to-string($val) {
-  @if (type-of($val) == map) or ($val == null) {
-    @return inspect($val);
-  }
-  @return $val + '';
+  @return inspect($val);
 }
 
 @function wm-is-equal($val, $val2) {
@@ -175,7 +172,7 @@
 // Number
 // ------------------------------
 
-@function wm-add-unit($num, $unit: px) {
+@function wm-set-unit($num, $unit: px) {
   @if unitless($num) {
     @return $num + $unit;
   } @else {

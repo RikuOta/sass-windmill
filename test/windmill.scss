@@ -13,7 +13,7 @@ $wm-error-to-css: true;
 $wm-show-error: true;
 
 @include describe('windmill [mixin]') {
-  @include it('Do not pass the selector') {
+  @include it('Throw error if the selector is empty') {
     @include assert() {
       @include output($selector: false) {
         @include windmill() {
@@ -28,7 +28,7 @@ $wm-show-error: true;
     }
   }
 
-  @include it('Include `$wm-breakpoint-placeholder` in the selector, and do not set the breakpoints') {
+  @include it('Throw error if the selector includes `$wm-breakpoint-placeholder` and the breakpoints is not set') {
     @include assert() {
       @include output($selector: false) {
         .test-BR {
@@ -45,7 +45,7 @@ $wm-show-error: true;
     }
   }
 
-  @include it('Do not include `$wm-val-placeholder` in the selector, and include `map` in `$style`') {
+  @include it('Throw error if the selector does not include `$wm-val-placeholder` and value of `$style` includes `map`') {
     @include assert() {
       @include output($selector: false) {
         .test {
@@ -55,6 +55,56 @@ $wm-show-error: true;
 
       @include contains($selector: false) {
         .test {
+        }
+      }
+    }
+  }
+
+  @include it('Call with group of selectors') {
+    @include assert() {
+      @include output($selector: false) {
+        .test1, .test2 {
+          @include windmill() {
+            margin: 10px;
+          }
+        }
+      }
+
+      @include expect($selector: false) {
+        .test1, .test2 {
+          margin: 10px;
+        }
+      }
+    }
+  }
+
+  @include it('Pass a string to `$selector`') {
+    @include assert() {
+      @include output($selector: false) {
+        @include windmill($selector: ('.test1, .test2')) {
+          margin: 10px;
+        }
+      }
+
+      @include expect($selector: false) {
+        .test1, .test2 {
+          margin: 10px;
+        }
+      }
+    }
+  }
+
+  @include it('Pass a list to `$selector`') {
+    @include assert() {
+      @include output($selector: false) {
+        @include windmill($selector: ('.test1', '.test2')) {
+          margin: 10px;
+        }
+      }
+
+      @include expect($selector: false) {
+        .test1, .test2 {
+          margin: 10px;
         }
       }
     }

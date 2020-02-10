@@ -34,6 +34,18 @@
   }
 }
 
+// Convert to a string that can use as the selector
+@function wm-to-selector($val) {
+  @if type-of($val) != string {
+    $val: wm-to-string($val);
+  }
+  $val: wm-str-replace($val, '(', '');
+  $val: wm-str-replace($val, ')', '');
+  $val: wm-str-replace($val, '\'', '');
+  $val: wm-str-replace($val, '"', '');
+  @return $val;
+}
+
 // wm-remove-keys-including-map((1: 10px, 2: (map: map))); => (1: 10px)
 @function wm-remove-keys-including-map($map) {
   @each $key, $val in $map {
@@ -54,11 +66,12 @@
   @return $map;
 }
 
-// wm-style-val-to-str(0 auto);         => "0 auto"
-// wm-style-val-to-str(0 (1: 10px), 1); => "0 10px"
+// wm-style-val-to-str(0 auto);              => "0 auto"
+// wm-style-val-to-str(0 (1: 10px), 1);      => "0 10px"
+// wm-style-val-to-str(0 null (1: 10px), 1); => "0 10px"
 @function wm-style-val-to-str($style-val, $key: null) {
   @if $style-val == null {
-    @return null;
+    @return '';
   }
   @if (type-of($style-val) != list) and (type-of($style-val) != map) {
     @return $style-val + '';
@@ -68,6 +81,7 @@
   }
   @if type-of($style-val) == list {
     $res: wm-map($style-val, wm-style-val-to-str, $key);
+    $res: wm-map($res, unquote);
     $res: wm-compact($res);
     $res: wm-join($res, ' ');
     @return $res;
@@ -88,7 +102,7 @@
   @return $str;
 }
 
-// If there are wrong with style value, resolves it
+// Resolves wrong with style value
 @function wm-fix-style-val($style-val) {
   @if ($style-val == null) or (wm-trim($style-val) == '') or (wm-trim($style-val) == '!important') {
     @return null;
@@ -112,8 +126,15 @@
   @if wm-remove-unit($from) <= 0 {
     @content;
   } @else {
-    @media (min-width: wm-add-unit($from, px)) {
+    @media (min-width: wm-set-unit($from, px)) {
       @content;
     }
+  }
+}
+
+// Alias for `wm-mq()`
+@mixin wm-override-mq($from) {
+  @include wm-mq($from) {
+    @content;
   }
 }

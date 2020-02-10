@@ -1,6 +1,6 @@
 # Sass Windmill [![Build Status](https://travis-ci.org/RikuOta/sass-windmill.svg?branch=master)](https://travis-ci.org/RikuOta/sass-windmill) <img alt="MIT licensed" src="https://img.shields.io/github/license/RikuOta/sass-windmill?color=blue">
 
-A [Sass](https://sass-lang.com/) mixin that helps you define utility classes such as `.mb-10px` flexibly and quickly.
+A [Sass](https://sass-lang.com/) mixin that helps you define utility classes such as `.mb-10` flexibly and quickly.
 
 Example:
 
@@ -99,7 +99,7 @@ OR:
 
     ```scss
     // A map of (name: screen width),
-    // if screen width <= 0, outputs CSS rules outside @media blocks
+    // if screen width <= 0, CSS rules are output outside @media blocks
     $wm-breakpoints: (
       all: 0,
       sm: 576px,
@@ -123,21 +123,20 @@ OR:
     // -1: .foo-BR-bar => .foo-bar
     $wm-min-breakpoint-addition: 1 !default;
 
-    // If you want output error messages in CSS files
+    // If you want output error messages into CSS files
     // instead of the terminal, set `true`
     $wm-error-to-css: false !default;
 
-    // If you want to display error messages in the your site
-    // instead of the terminal, set `true`
+    // If you want to display error messages in the your site, set `true`
     $wm-show-error: false !default;
     ```
 
-1. Call `windmill()` (see below)
+1. Use `windmill()` (see below)
 
 ## Usage
 
 `$wm-breakpoints` is a map of (name: screen width).  
-If you set the breakpoints, `windmill` replaces `BR` placeholder in the selector with key names and outputs CSS rules to each breakpoints:
+If you set the breakpoints, `windmill()` replaces `BR` placeholder in the selector with key names and outputs CSS rules to each breakpoints:
 
 ```scss
 $wm-breakpoints: (
@@ -162,6 +161,16 @@ Compiles to:
 @media (min-width: 576px) {
   .sm-foo {
     display: block;
+  }
+}
+```
+
+If you want to change Media Query mixin:
+
+```scss
+@mixin wm-override-mq($from) {
+  @include your-mq($from) {
+    @content;
   }
 }
 ```
