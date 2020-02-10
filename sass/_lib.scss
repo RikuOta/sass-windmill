@@ -80,6 +80,7 @@
   }
   @if type-of($style-val) == list {
     $res: wm-map($style-val, wm-style-val-to-str, $key);
+    $res: wm-map($res, unquote);
     $res: wm-compact($res);
     $res: wm-join($res, ' ');
     @return $res;
