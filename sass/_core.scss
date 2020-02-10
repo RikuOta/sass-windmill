@@ -3,7 +3,7 @@
 // ------------------------------
 
 // A map of (name: screen width),
-// if screen width <= 0, outputs CSS rules outside @media blocks
+// if screen width <= 0, CSS rules are output outside @media blocks
 $wm-breakpoints: (
   all: 0,
   sm: 576px,
@@ -27,12 +27,11 @@ $wm-val-placeholder: 'VAL' !default;
 // -1: .foo-BR-bar => .foo-bar
 $wm-min-breakpoint-addition: 1 !default;
 
-// If you want output error messages in CSS files
+// If you want output error messages into CSS files
 // instead of the terminal, set `true`
 $wm-error-to-css: false !default;
 
-// If you want to display error messages in the your site
-// instead of the terminal, set `true`
+// If you want to display error messages in the your site, set `true`
 $wm-show-error: false !default;
 
 // ------------------------------
@@ -46,7 +45,7 @@ $wm-error-messages: () !default;
   $selector: null,
   $breakpoints: $wm-breakpoints
 ) {
-  // Set to false when exception is thrown, disable output
+  // Set `false` and disable output when an exception is thrown
   $is-output: true;
 
   // Resolve type of `$style`
@@ -73,7 +72,7 @@ $wm-error-messages: () !default;
   }
 
   // Throw if `$selector` includes `$wm-breakpoint-placeholder`,
-  // but breakpoints is empty
+  // but `$breakpoints` is empty
   @if $is-output and wm-include($selector, $wm-breakpoint-placeholder) and wm-is-empty($breakpoints) {
     @include wm-warn('If you include `#{$wm-breakpoint-placeholder}` in your selector, set the breakpoints. Target selector: `#{$selector}`', $selector);
     $is-output: false;

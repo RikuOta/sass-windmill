@@ -66,11 +66,12 @@
   @return $map;
 }
 
-// wm-style-val-to-str(0 auto);         => "0 auto"
-// wm-style-val-to-str(0 (1: 10px), 1); => "0 10px"
+// wm-style-val-to-str(0 auto);              => "0 auto"
+// wm-style-val-to-str(0 (1: 10px), 1);      => "0 10px"
+// wm-style-val-to-str(0 null (1: 10px), 1); => "0 10px"
 @function wm-style-val-to-str($style-val, $key: null) {
   @if $style-val == null {
-    @return null;
+    @return '';
   }
   @if (type-of($style-val) != list) and (type-of($style-val) != map) {
     @return $style-val + '';
@@ -101,7 +102,7 @@
   @return $str;
 }
 
-// If there are wrong with style value, resolves it
+// Resolves wrong with style value
 @function wm-fix-style-val($style-val) {
   @if ($style-val == null) or (wm-trim($style-val) == '') or (wm-trim($style-val) == '!important') {
     @return null;
