@@ -62,9 +62,9 @@ $wm-error-messages: () !default;
 
   // Cast the selector to string
   @if not $selector or ($selector == '') {
-    $selector: wm-to-string(wm-flatten-deep(&));
+    $selector: wm-to-selector(&);
   } @else {
-    $selector: wm-to-string($selector);
+    $selector: wm-to-selector($selector);
   }
 
   // Resolve type of `$breakpoints`

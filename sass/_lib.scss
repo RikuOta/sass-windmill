@@ -34,6 +34,18 @@
   }
 }
 
+// Convert to a string that can use as the selector
+@function wm-to-selector($val) {
+  @if type-of($val) != string {
+    $val: wm-to-string($val);
+  }
+  $val: wm-str-replace($val, '(', '');
+  $val: wm-str-replace($val, ')', '');
+  $val: wm-str-replace($val, '\'', '');
+  $val: wm-str-replace($val, '"', '');
+  @return $val;
+}
+
 // wm-remove-keys-including-map((1: 10px, 2: (map: map))); => (1: 10px)
 @function wm-remove-keys-including-map($map) {
   @each $key, $val in $map {
