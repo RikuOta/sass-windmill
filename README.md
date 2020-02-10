@@ -166,6 +166,16 @@ Compiles to:
 }
 ```
 
+If you want to change Media Query mixin:
+
+```scss
+@mixin wm-override-mq($from) {
+  @include your-mq($from) {
+    @content;
+  }
+}
+```
+
 `$style` parameter of `windmill($style, $selector, $breakpoints)` is general CSS declarations block. The only difference is that the value accepts `map` such as `margin: (1: 10px, 2: 20px)`.  
 If `map` is included, `windmill()` replaces `VAL` placeholder in the selector with key names, embeds the value in `$style`, and outputs CSS rules:
 

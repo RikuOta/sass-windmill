@@ -103,7 +103,7 @@ $wm-error-messages: () !default;
   @if $is-output {
     @at-root {
       @each $breakpoint-name, $breakpoint in $breakpoints {
-        @include wm-mq($breakpoint) {
+        @include wm-override-mq($breakpoint) {
           $breakpoint-values: map-values($breakpoints);
           $is-min-breakpoint: $breakpoint == min($breakpoint-values...);
 

@@ -130,3 +130,10 @@
     }
   }
 }
+
+// Alias for `wm-mq()`
+@mixin wm-override-mq($from) {
+  @include wm-mq($from) {
+    @content;
+  }
+}
